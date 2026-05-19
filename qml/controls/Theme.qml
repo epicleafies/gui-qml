@@ -24,6 +24,7 @@ Control {
         required property color orangeLight1
         required property color orangeLight2
         required property color red
+        required property color dangerBackground
         required property color green
         required property color blue
         required property color amber
@@ -72,6 +73,7 @@ Control {
         orangeLight1: "#FFAD4A"
         orangeLight2: "#FFBF72"
         red: "#EC6363"
+        dangerBackground: "#3A1F1A"
         green: "#36B46B"
         blue: "#3CA3DE"
         amber: "#C9B500"
@@ -104,6 +106,7 @@ Control {
         orangeLight1: "#FFAD4A"
         orangeLight2: "#FFBF72"
         red: "#EB5757"
+        dangerBackground: "#FBEEEA"
         green: "#27AE60"
         blue: "#2D9CDB"
         amber: "#C9B500"
