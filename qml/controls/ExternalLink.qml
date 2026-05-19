@@ -73,5 +73,4 @@ AbstractButton {
             }
         }
     }
-    onClicked: Qt.openUrlExternally(link)
 }

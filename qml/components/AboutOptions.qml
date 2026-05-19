@@ -13,6 +13,7 @@ ColumnLayout {
     spacing: 4
     Setting {
         id: websiteLink
+        objectName: "websiteLinkSetting"
         Layout.fillWidth: true
         header: qsTr("Website")
         actionItem: ExternalLink {
@@ -78,7 +79,7 @@ ColumnLayout {
     ExternalPopup {
         id: confirmPopup
         anchors.centerIn: Overlay.overlay
-        width: parent.width
+        width: Math.min(parent.width - 40, 480)
     }
 
     function openPopup(link) {
