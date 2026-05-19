@@ -291,6 +291,7 @@ private Q_SLOTS:
     void encryptWalletUpdatesSecurityState();
     void changeWalletPassphraseForwardsPasswords();
     void backupWalletForwardsPath();
+    void allRecipientsValid_reflectsListState();
 };
 
 void WalletQmlModelTests::initTestCase()
@@ -971,6 +972,62 @@ void WalletQmlModelTests::sendTransactionWithPrivateKeysDisabledDoesNotCommit()
     QCOMPARE(model->transactionError(), QString("This wallet cannot sign transactions."));
     QCOMPARE(wallet->commit_calls, 0);
     QVERIFY(wallet->fill_psbt_sign_args.empty());
+}
+
+void WalletQmlModelTests::allRecipientsValid_reflectsListState()
+{
+    SendRecipientsListModel recipients;
+    auto* first = recipients.currentRecipient();
+    QVERIFY(first != nullptr);
+
+    first->address()->setAddress(VALID_MAINNET_ADDRESS, 0);
+    first->amount()->setSatoshi(50'000);
+    QVERIFY(first->isValid());
+    QVERIFY(recipients.allRecipientsValid());
+
+    QSignalSpy aggregate_spy{&recipients, &SendRecipientsListModel::allRecipientsValidChanged};
+
+    recipients.add();
+    QCOMPARE(recipients.count(), 2);
+    QVERIFY(!recipients.allRecipientsValid());
+    QVERIFY(aggregate_spy.count() >= 1);
+
+    auto* second = recipients.currentRecipient();
+    QVERIFY(second != nullptr);
+    QVERIFY(second != first);
+
+    aggregate_spy.clear();
+    second->address()->setAddress(VALID_MAINNET_ADDRESS, 0);
+    second->amount()->setSatoshi(75'000);
+    QVERIFY(second->isValid());
+    QVERIFY(recipients.allRecipientsValid());
+    QVERIFY(aggregate_spy.count() >= 1);
+
+    aggregate_spy.clear();
+    second->amount()->setSatoshi(0);
+    QVERIFY(!second->isValid());
+    QVERIFY(!recipients.allRecipientsValid());
+    QVERIFY(aggregate_spy.count() >= 1);
+
+    aggregate_spy.clear();
+    recipients.remove();
+    QCOMPARE(recipients.count(), 1);
+    QVERIFY(recipients.allRecipientsValid());
+    QVERIFY(aggregate_spy.count() >= 1);
+
+    aggregate_spy.clear();
+    recipients.clear();
+    QCOMPARE(recipients.count(), 1);
+    QVERIFY(!recipients.allRecipientsValid());
+    QVERIFY(aggregate_spy.count() >= 1);
+
+    aggregate_spy.clear();
+    auto* fresh = recipients.currentRecipient();
+    QVERIFY(fresh != nullptr);
+    fresh->address()->setAddress(VALID_MAINNET_ADDRESS, 0);
+    fresh->amount()->setSatoshi(25'000);
+    QVERIFY(recipients.allRecipientsValid());
+    QVERIFY(aggregate_spy.count() >= 1);
 }
 
 #ifdef BITCOINQML_NO_TEST_MAIN

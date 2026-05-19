@@ -264,6 +264,34 @@ def case_single_sat(harness, gui, wallet_name, checkpoints):
     return_to_send_page(gui, "sendReviewBackButton")
 
 
+def case_review_disabled_with_empty_second_recipient(harness, gui, wallet_name, checkpoints):
+    first_address = rpc_call(harness.gui_rpc_port, "getnewaddress", wallet=wallet_name)
+    second_address = rpc_call(harness.gui_rpc_port, "getnewaddress", wallet=wallet_name)
+
+    open_send_page(gui)
+    set_multiple_recipients(gui, True)
+    gui.click("sendRecipientPrevButton")
+    set_amount_unit(gui, "₿")
+    gui.set_text("sendAddressInput", first_address)
+    gui.set_text("sendAmountInput", "0.10000000")
+
+    gui.wait_for_property("sendReviewButton", "enabled", False, timeout_ms=10000)
+    checkpoints.checkpoint("review disabled with empty second recipient", gui)
+
+    gui.click("sendRecipientNextButton")
+    set_amount_unit(gui, "sat")
+    gui.set_text("sendAddressInput", second_address)
+    gui.set_text("sendAmountInput", "2000")
+
+    gui.wait_for_property("sendReviewButton", "enabled", True, timeout_ms=10000)
+    checkpoints.checkpoint("review enabled after filling second recipient", gui)
+
+    gui.click("sendReviewButton")
+    gui.wait_for_page("multipleSendReviewPage", timeout_ms=10000)
+    return_to_send_page(gui, "multipleSendReviewBackButton")
+    set_multiple_recipients(gui, False)
+
+
 def case_multi_review(harness, gui, wallet_name, checkpoints):
     first_address = rpc_call(harness.gui_rpc_port, "getnewaddress", wallet=wallet_name)
     second_address = rpc_call(harness.gui_rpc_port, "getnewaddress", wallet=wallet_name)
@@ -363,6 +391,7 @@ def run_tests(args):
         case_single_btc(harness, gui, wallet_name, checkpoints)
         case_single_sat(harness, gui, wallet_name, checkpoints)
         case_multi_review(harness, gui, wallet_name, checkpoints)
+        case_review_disabled_with_empty_second_recipient(harness, gui, wallet_name, checkpoints)
 
         print(f"[{case_name}] completed")
         print("Send review flows passed.")

@@ -267,6 +267,7 @@ class MockRecipientsModel : public QAbstractListModel
     Q_PROPERTY(QObject* current READ current NOTIFY currentChanged)
     Q_PROPERTY(int currentIndex READ currentIndex WRITE setCurrentIndex NOTIFY currentIndexChanged)
     Q_PROPERTY(int count READ count NOTIFY countChanged)
+    Q_PROPERTY(bool allRecipientsValid MEMBER m_all_recipients_valid NOTIFY allRecipientsValidChanged)
 
 public:
     enum Roles {
@@ -385,11 +386,13 @@ Q_SIGNALS:
     void currentRecipientChanged();
     void currentIndexChanged();
     void countChanged();
+    void allRecipientsValidChanged();
     void listCleared();
 
 private:
     QObject* m_current{nullptr};
     int m_current_index{1};
+    bool m_all_recipients_valid{true};
     std::vector<RecipientRow> m_rows{};
 };
 

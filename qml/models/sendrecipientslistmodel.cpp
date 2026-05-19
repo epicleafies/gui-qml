@@ -7,6 +7,8 @@
 
 #include <qml/models/sendrecipient.h>
 
+#include <algorithm>
+
 SendRecipientsListModel::SendRecipientsListModel(QObject* parent)
     : QAbstractListModel(parent)
 {
@@ -68,6 +70,7 @@ void SendRecipientsListModel::add()
 
     endInsertRows();
     Q_EMIT countChanged();
+    Q_EMIT allRecipientsValidChanged();
     setCurrentIndex(row);
 }
 
@@ -112,6 +115,7 @@ void SendRecipientsListModel::remove()
     }
     endRemoveRows();
     Q_EMIT countChanged();
+    Q_EMIT allRecipientsValidChanged();
 }
 
 SendRecipient* SendRecipientsListModel::currentRecipient() const
@@ -152,6 +156,9 @@ void SendRecipientsListModel::connectRecipientSignals(SendRecipient* recipient)
     connect(recipient->amount(), &BitcoinAmount::unitChanged, this, [emit_roles_changed] {
         emit_roles_changed({AmountRole, AmountUnitLabelRole});
     });
+    connect(recipient, &SendRecipient::isValidChanged, this, [this] {
+        Q_EMIT allRecipientsValidChanged();
+    });
 }
 
 int SendRecipientsListModel::recipientRow(const SendRecipient* recipient) const
@@ -172,6 +179,13 @@ void SendRecipientsListModel::updateTotalAmount()
 QString SendRecipientsListModel::totalAmount() const
 {
     return BitcoinAmount::satsToBtcString(m_totalAmount);
+}
+
+bool SendRecipientsListModel::allRecipientsValid() const
+{
+    return std::all_of(m_recipients.cbegin(), m_recipients.cend(), [](const SendRecipient* r) {
+        return r && r->isValid();
+    });
 }
 
 void SendRecipientsListModel::clear()
@@ -195,6 +209,7 @@ void SendRecipientsListModel::clear()
     Q_EMIT totalAmountChanged();
     Q_EMIT currentRecipientChanged();
     Q_EMIT currentIndexChanged();
+    Q_EMIT allRecipientsValidChanged();
     Q_EMIT listCleared();
 }
 
@@ -215,6 +230,7 @@ void SendRecipientsListModel::clearToFront()
 
     if (count_changed) {
         Q_EMIT countChanged();
+        Q_EMIT allRecipientsValidChanged();
     }
 
     if (m_totalAmount != m_recipients[0]->amount()->satoshi()) {

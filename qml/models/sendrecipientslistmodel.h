@@ -17,6 +17,7 @@ class SendRecipientsListModel : public QAbstractListModel
     Q_PROPERTY(int count READ count NOTIFY countChanged)
     Q_PROPERTY(SendRecipient* current READ currentRecipient NOTIFY currentRecipientChanged)
     Q_PROPERTY(QString totalAmount READ totalAmount NOTIFY totalAmountChanged)
+    Q_PROPERTY(bool allRecipientsValid READ allRecipientsValid NOTIFY allRecipientsValidChanged)
 
 public:
     enum Roles {
@@ -48,12 +49,14 @@ public:
     QList<SendRecipient*> recipients() const { return m_recipients; }
     QString totalAmount() const;
     qint64 totalAmountSatoshi() const { return m_totalAmount; }
+    bool allRecipientsValid() const;
 
 Q_SIGNALS:
     void currentIndexChanged();
     void currentRecipientChanged();
     void countChanged();
     void totalAmountChanged();
+    void allRecipientsValidChanged();
     void listCleared();
 
 private:

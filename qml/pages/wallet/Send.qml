@@ -478,8 +478,8 @@ PageStack {
                     Layout.fillWidth: true
                     Layout.topMargin: 30
                     text: root.externalSignerWallet ? qsTr("Review transaction") : qsTr("Review")
-                    enabled: root.recipient.isValid
-                        && (!root.wallet || !root.wallet.customFeeEnabled || root.wallet.customFeeRateValid)
+                    enabled: root.wallet && root.wallet.recipients.allRecipientsValid
+                        && (!root.wallet.customFeeEnabled || root.wallet.customFeeRateValid)
                     onClicked: {
                         root.clearPrepareTransactionError()
                         if (root.wallet.prepareTransaction()) {

@@ -29,6 +29,7 @@ TestCase {
         testWalletModel.prepareTransactionResult = true
         testSendRecipient.subtractFeeFromAmount = false
         testSendRecipient.isValid = true
+        testRecipientsModel.allRecipientsValid = true
     }
 
     function test_send_has_stable_selectors() {
@@ -57,11 +58,14 @@ TestCase {
         const continueButton = findChild(page, "sendReviewButton")
         verify(continueButton !== null)
 
-        testSendRecipient.isValid = false
+        testRecipientsModel.allRecipientsValid = false
         tryCompare(continueButton, "enabled", false)
 
-        testSendRecipient.isValid = true
+        testRecipientsModel.allRecipientsValid = true
         tryCompare(continueButton, "enabled", true)
+
+        testRecipientsModel.allRecipientsValid = false
+        tryCompare(continueButton, "enabled", false)
     }
 
     function test_send_prepare_transaction_success_and_failure_paths() {
@@ -75,7 +79,7 @@ TestCase {
         verify(prepareError !== null)
         verify(prepareErrorText !== null)
 
-        testSendRecipient.isValid = true
+        testRecipientsModel.allRecipientsValid = true
         transactionPreparedSpy.target = page
         transactionPreparedSpy.signalName = "transactionPrepared"
         transactionPreparedSpy.clear()
@@ -188,7 +192,7 @@ TestCase {
         verify(continueButton !== null)
         verify(customInput !== null)
 
-        testSendRecipient.isValid = true
+        testRecipientsModel.allRecipientsValid = true
 
         popup.open()
         tryVerify(function() {
