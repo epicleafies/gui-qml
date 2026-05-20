@@ -44,10 +44,13 @@ class DebugLogHarness:
         self.process = None
         self.driver = None
         self.datadir = setup_datadir(self.tmpdir)
+        self.config_home = os.path.join(self.tmpdir, "config")
 
     def start(self):
         env = dict(os.environ)
         env["QT_QPA_PLATFORM"] = "offscreen"
+        os.makedirs(self.config_home, exist_ok=True)
+        env["XDG_CONFIG_HOME"] = self.config_home
         args = [
             self.gui_binary,
             f"-datadir={self.datadir}",

@@ -57,6 +57,7 @@
 
 #include <boost/signals2/connection.hpp>
 #include <cassert>
+#include <cstdlib>
 #include <memory>
 #include <tuple>
 
@@ -321,6 +322,17 @@ int QmlGuiMain(int argc, char* argv[])
     ChainModel chain_model{*chain};
     chain_model.setCurrentNetworkName(QString::fromStdString(gArgs.GetChainTypeString()));
     setupChainQSettings(&app, chain_model.currentNetworkName());
+
+#ifdef ENABLE_TEST_AUTOMATION
+    if (gArgs.IsArgSet("-test-automation")) {
+        const char* config_home = std::getenv("XDG_CONFIG_HOME");
+        if (config_home && config_home[0] != '\0') {
+            QSettings::setDefaultFormat(QSettings::IniFormat);
+            QSettings::setPath(QSettings::IniFormat, QSettings::UserScope,
+                               QString::fromUtf8(config_home));
+        }
+    }
+#endif
 
     QObject::connect(&node_model, &NodeModel::setTimeRatioList, &chain_model, &ChainModel::setTimeRatioList);
     QObject::connect(&node_model, &NodeModel::setTimeRatioListInitial, &chain_model, &ChainModel::setTimeRatioListInitial);

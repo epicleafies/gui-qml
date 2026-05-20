@@ -132,6 +132,7 @@ class PeerQmlTestHarness:
 
         self.gui_datadir = self._setup_gui_datadir()
         self.peer_datadir = self._setup_peer_datadir()
+        self.config_home = os.path.join(self.tmpdir, "config")
 
     # ── datadir setup ─────────────────────────────────────────────────────────
 
@@ -175,6 +176,8 @@ class PeerQmlTestHarness:
         """Start the GUI node, connect QmlDriver, then start the peer node."""
         env = dict(os.environ)
         env["QT_QPA_PLATFORM"] = "offscreen"
+        os.makedirs(self.config_home, exist_ok=True)
+        env["XDG_CONFIG_HOME"] = self.config_home
 
         gui_args = [
             self.gui_binary,
@@ -354,6 +357,8 @@ class PeerQmlTestHarness:
 
         env = dict(os.environ)
         env["QT_QPA_PLATFORM"] = "offscreen"
+        os.makedirs(self.config_home, exist_ok=True)
+        env["XDG_CONFIG_HOME"] = self.config_home
         gui_args = [
             self.gui_binary,
             f"-datadir={self.gui_datadir}",
