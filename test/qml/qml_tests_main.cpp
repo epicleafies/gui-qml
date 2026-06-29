@@ -2958,6 +2958,7 @@ public:
         Today,
         ThisWeek,
         ThisMonth,
+        LastMonth,
         ThisYear
     };
     Q_ENUM(DateFilter)
@@ -2968,6 +2969,7 @@ public:
         Sent,
         SentToSelf,
         Mined,
+        Other,
         PaymentRequest
     };
     Q_ENUM(TypeFilter)
