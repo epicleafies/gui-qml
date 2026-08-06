@@ -8,6 +8,8 @@
 
 #include <limits>
 
+#include <QRegularExpression>
+
 class BitcoinAmountTests : public QObject {
     Q_OBJECT
 
@@ -22,6 +24,8 @@ private Q_SLOTS:
     void display_flow_sat();
     void displayWithUnit_formatsAmountAndUnit();
     void flipUnit_changesLabelAndDisplaySignal();
+    void inputRules_followUnit();
+    void fromDisplayUnit_mapsAndClampsToBtc();
 };
 
 void BitcoinAmountTests::satsToBtcString_basic()
@@ -128,6 +132,47 @@ void BitcoinAmountTests::flipUnit_changesLabelAndDisplaySignal()
     QSignalSpy spy(&amt, &BitcoinAmount::displayChanged);
     amt.flipUnit();
     QVERIFY(spy.count() >= 1);
+}
+
+void BitcoinAmountTests::inputRules_followUnit()
+{
+    BitcoinAmount amt;
+
+    amt.setUnit(BitcoinAmount::Unit::BTC);
+    QCOMPARE(amt.inputPlaceholder(), QString("0.00000000"));
+    QCOMPARE(amt.maximumInputLength(), 17);
+    QVERIFY(QRegularExpression(amt.inputPattern()).match("20999999.99999999").hasMatch());
+    // Transient editing state: typing in front of "0.xxx" goes through "01.xxx".
+    QVERIFY(QRegularExpression(amt.inputPattern()).match("01.00000000").hasMatch());
+    QVERIFY(!QRegularExpression(amt.inputPattern()).match("1.234567890").hasMatch());
+
+    amt.setUnit(BitcoinAmount::Unit::mBTC);
+    QCOMPARE(amt.inputPlaceholder(), QString("0.00000"));
+    QCOMPARE(amt.maximumInputLength(), 17);
+    QVERIFY(QRegularExpression(amt.inputPattern()).match("20999999999.99999").hasMatch());
+    QVERIFY(!QRegularExpression(amt.inputPattern()).match("1.234567").hasMatch());
+
+    amt.setUnit(BitcoinAmount::Unit::uBTC);
+    QCOMPARE(amt.inputPlaceholder(), QString("0.00"));
+    QCOMPARE(amt.maximumInputLength(), 17);
+    QVERIFY(QRegularExpression(amt.inputPattern()).match("20999999999999.99").hasMatch());
+    QVERIFY(!QRegularExpression(amt.inputPattern()).match("1.234").hasMatch());
+
+    amt.setUnit(BitcoinAmount::Unit::SAT);
+    QCOMPARE(amt.inputPlaceholder(), QString("0"));
+    QCOMPARE(amt.maximumInputLength(), 16);
+    QVERIFY(QRegularExpression(amt.inputPattern()).match("2099999999999999").hasMatch());
+    QVERIFY(!QRegularExpression(amt.inputPattern()).match("1.2").hasMatch());
+}
+
+void BitcoinAmountTests::fromDisplayUnit_mapsAndClampsToBtc()
+{
+    QCOMPARE(BitcoinAmount::fromDisplayUnit(0), BitcoinAmount::Unit::BTC);
+    QCOMPARE(BitcoinAmount::fromDisplayUnit(1), BitcoinAmount::Unit::mBTC);
+    QCOMPARE(BitcoinAmount::fromDisplayUnit(2), BitcoinAmount::Unit::uBTC);
+    QCOMPARE(BitcoinAmount::fromDisplayUnit(3), BitcoinAmount::Unit::SAT);
+    QCOMPARE(BitcoinAmount::fromDisplayUnit(-1), BitcoinAmount::Unit::BTC);
+    QCOMPARE(BitcoinAmount::fromDisplayUnit(99), BitcoinAmount::Unit::BTC);
 }
 
 #ifdef BITCOINQML_NO_TEST_MAIN

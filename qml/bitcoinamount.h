@@ -1,4 +1,4 @@
-// Copyright (c) 2024-2025 The Bitcoin Core developers
+// Copyright (c) 2024-2026 The Bitcoin Core developers
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -18,6 +18,9 @@ class BitcoinAmount : public QObject
     Q_PROPERTY(QString display READ toDisplay WRITE fromDisplay NOTIFY displayChanged)
     Q_PROPERTY(QString displayWithUnit READ displayWithUnit NOTIFY displayWithUnitChanged)
     Q_PROPERTY(qint64 satoshi READ satoshi WRITE setSatoshi NOTIFY amountChanged)
+    Q_PROPERTY(QString inputPlaceholder READ inputPlaceholder NOTIFY unitChanged)
+    Q_PROPERTY(QString inputPattern READ inputPattern NOTIFY unitChanged)
+    Q_PROPERTY(int maximumInputLength READ maximumInputLength NOTIFY unitChanged)
 
 public:
     enum class Unit {
@@ -33,6 +36,9 @@ public:
     Unit unit() const;
     void setUnit(Unit unit);
     QString unitLabel() const;
+    QString inputPlaceholder() const;
+    QString inputPattern() const;
+    int maximumInputLength() const;
 
     QString toDisplay() const;
     QString displayWithUnit() const;
@@ -45,6 +51,7 @@ public:
     Q_INVOKABLE void format();
 
     static QString satsToBtcString(qint64 sat);
+    static Unit fromDisplayUnit(int display_unit);
 
 public Q_SLOTS:
     void flipUnit();

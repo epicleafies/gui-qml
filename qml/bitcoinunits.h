@@ -30,8 +30,6 @@ public:
     static Unit fromDisplayUnit(int display_unit);
     static QString label(Unit unit);
     static QString displayLabel(Unit unit, CAmount amount);
-
-private:
     static qint64 factor(Unit unit);
     static int decimals(Unit unit);
 };

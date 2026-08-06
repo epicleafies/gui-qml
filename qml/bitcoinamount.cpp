@@ -13,28 +13,6 @@
 #include <QStringList>
 
 namespace {
-qint64 UnitFactor(BitcoinAmount::Unit unit)
-{
-    switch (unit) {
-    case BitcoinAmount::Unit::BTC: return COIN;
-    case BitcoinAmount::Unit::mBTC: return 100'000;
-    case BitcoinAmount::Unit::uBTC: return 100;
-    case BitcoinAmount::Unit::SAT: return 1;
-    }
-    assert(false);
-}
-
-int UnitDecimals(BitcoinAmount::Unit unit)
-{
-    switch (unit) {
-    case BitcoinAmount::Unit::BTC: return 8;
-    case BitcoinAmount::Unit::mBTC: return 5;
-    case BitcoinAmount::Unit::uBTC: return 2;
-    case BitcoinAmount::Unit::SAT: return 0;
-    }
-    assert(false);
-}
-
 QmlBitcoinUnits::Unit ToQmlUnit(BitcoinAmount::Unit unit)
 {
     switch (unit) {
@@ -44,6 +22,21 @@ QmlBitcoinUnits::Unit ToQmlUnit(BitcoinAmount::Unit unit)
     case BitcoinAmount::Unit::SAT: return QmlBitcoinUnits::Unit::SAT;
     }
     assert(false);
+}
+
+qint64 UnitFactor(BitcoinAmount::Unit unit)
+{
+    return QmlBitcoinUnits::factor(ToQmlUnit(unit));
+}
+
+int UnitDecimals(BitcoinAmount::Unit unit)
+{
+    return QmlBitcoinUnits::decimals(ToQmlUnit(unit));
+}
+
+int MaxWholeDigits(BitcoinAmount::Unit unit)
+{
+    return QString::number(MAX_MONEY / UnitFactor(unit)).length();
 }
 } // namespace
 
@@ -126,12 +119,49 @@ QString BitcoinAmount::unitLabel() const
     return QmlBitcoinUnits::displayLabel(ToQmlUnit(m_unit), m_satoshi);
 }
 
+QString BitcoinAmount::inputPlaceholder() const
+{
+    const int decimals = UnitDecimals(m_unit);
+    if (decimals == 0) {
+        return QStringLiteral("0");
+    }
+    return QStringLiteral("0.") + QString(decimals, QLatin1Char('0'));
+}
+
+QString BitcoinAmount::inputPattern() const
+{
+    // Leading zeros are allowed on purpose: typing in front of an existing
+    // "0.xxx" passes through states like "01.xxx", which format() normalizes.
+    const int whole_digits = MaxWholeDigits(m_unit);
+    const int decimals = UnitDecimals(m_unit);
+    if (decimals == 0) {
+        return QStringLiteral("^0*\\d{0,%1}$").arg(whole_digits);
+    }
+    return QStringLiteral("^0*\\d{0,%1}(\\.\\d{0,%2})?$")
+        .arg(whole_digits)
+        .arg(decimals);
+}
+
+int BitcoinAmount::maximumInputLength() const
+{
+    const int decimals = UnitDecimals(m_unit);
+    return MaxWholeDigits(m_unit) + (decimals > 0 ? decimals + 1 : 0);
+}
+
+BitcoinAmount::Unit BitcoinAmount::fromDisplayUnit(int display_unit)
+{
+    switch (display_unit) {
+    case 0: return Unit::BTC;
+    case 1: return Unit::mBTC;
+    case 2: return Unit::uBTC;
+    case 3: return Unit::SAT;
+    }
+    return Unit::BTC;
+}
+
 void BitcoinAmount::flipUnit()
 {
-    m_unit = m_unit == Unit::SAT ? Unit::BTC : Unit::SAT;
-    Q_EMIT unitChanged();
-    Q_EMIT displayChanged();
-    Q_EMIT displayWithUnitChanged();
+    setUnit(m_unit == Unit::SAT ? Unit::BTC : Unit::SAT);
 }
 
 QString BitcoinAmount::satsToBtcString(qint64 sat)
