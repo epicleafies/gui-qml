@@ -1,4 +1,4 @@
-// Copyright (c) 2025 The Bitcoin Core developers
+// Copyright (c) 2025-2026 The Bitcoin Core developers
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -9,6 +9,8 @@
 
 #include <qml/bitcoinamount.h>
 
+#include <limits>
+
 class BitcoinAmountTests : public QObject {
     Q_OBJECT
 
@@ -16,6 +18,7 @@ private Q_SLOTS:
     void satsToBtcString_basic();
     void satsToBtcString_negative();
     void btcToSats_roundtrip();
+    void fromDisplay_saturatesAtFactorBoundary();
     void sanitize_clampsAndFilters();
     void display_flow_btc();
     void display_flow_mbtc_and_ubtc();
@@ -45,6 +48,21 @@ void BitcoinAmountTests::btcToSats_roundtrip()
     amt.setUnit(BitcoinAmount::Unit::BTC);
     amt.fromDisplay("1.23456789");
     QCOMPARE(amt.toDisplay(), QString("1.23456789"));
+}
+
+void BitcoinAmountTests::fromDisplay_saturatesAtFactorBoundary()
+{
+    // A whole part equal to qint64 max / factor used to pass the overflow
+    // guard, so whole * factor + frac overflowed. It must saturate instead;
+    // the result stays above MAX_MONEY, keeping amount validation intact.
+    BitcoinAmount amt;
+    amt.setUnit(BitcoinAmount::Unit::BTC);
+    amt.fromDisplay("92233720368.99999999");
+    QCOMPARE(amt.satoshi(), std::numeric_limits<qint64>::max());
+
+    amt.setUnit(BitcoinAmount::Unit::MicroBTC);
+    amt.fromDisplay("92233720368547758.99");
+    QCOMPARE(amt.satoshi(), std::numeric_limits<qint64>::max());
 }
 
 void BitcoinAmountTests::sanitize_clampsAndFilters()
