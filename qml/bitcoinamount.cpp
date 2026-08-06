@@ -1,4 +1,4 @@
-// Copyright (c) 2024-2025 The Bitcoin Core developers
+// Copyright (c) 2024-2026 The Bitcoin Core developers
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -179,8 +179,10 @@ qint64 BitcoinAmount::displayToSats(const QString& sanitized) const
         frac = parts[1].leftJustified(decimals, '0').toLongLong();
     }
 
+    // Saturate when the whole part reaches qint64 max / factor: adding the
+    // fractional satoshis on top of whole * factor could otherwise overflow.
     const qint64 factor = UnitFactor(m_unit);
-    if (whole > std::numeric_limits<qint64>::max() / factor) {
+    if (whole >= std::numeric_limits<qint64>::max() / factor) {
         return std::numeric_limits<qint64>::max();
     }
 
