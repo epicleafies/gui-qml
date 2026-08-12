@@ -61,6 +61,7 @@ public:
     Q_INVOKABLE void refresh();
     Q_INVOKABLE bool setAddressLabel(const QString& address, const QString& label);
     Q_INVOKABLE QString addressAt(int row) const;
+    void setDisplayUnit(int unit);
 
 Q_SIGNALS:
     void categoryChanged();
@@ -86,6 +87,7 @@ private:
     std::vector<AddressEntry> m_entries;
     Category m_category{SingleUse};
     bool m_show_used{false};
+    int m_display_unit{0};
 };
 
 #endif // BITCOIN_QML_MODELS_ADDRESSLISTMODEL_H

@@ -2271,6 +2271,9 @@ void WalletQmlModel::setDisplayUnit(int unit)
         if (m_coins_list_model) {
             m_coins_list_model->setDisplayUnit(unit);
         }
+        if (m_address_list_model) {
+            m_address_list_model->setDisplayUnit(unit);
+        }
         Q_EMIT balanceChanged();
         // The formatted fee estimates depend on the unit; bump the revision
         // so the fee picker bindings re-evaluate their estimate strings.

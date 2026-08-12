@@ -138,7 +138,7 @@ void AddressListModelTests::receiveAddressesHideUsedUntilEnabled()
 
     QCOMPARE(model->rowCount(), 1);
     QCOMPARE(model->data(model->index(0), AddressListModel::LabelRole).toString(), QStringLiteral("unused"));
-    QCOMPARE(model->data(model->index(0), AddressListModel::DisplayAmountRole).toString(), QStringLiteral("₿ 0.0"));
+    QCOMPARE(model->data(model->index(0), AddressListModel::DisplayAmountRole).toString(), QStringLiteral("0.0 ₿"));
     QCOMPARE(model->data(model->index(0), AddressListModel::HasAmountRole).toBool(), false);
 
     model->setShowUsed(true);
@@ -189,8 +189,12 @@ void AddressListModelTests::changeAddressesComeFromUnspentChangeOutputs()
     QCOMPARE(model->rowCount(), 1);
     QCOMPARE(model->data(model->index(0), AddressListModel::AddressRole).toString(), QString::fromStdString(EncodeDestination(change)));
     QCOMPARE(model->data(model->index(0), AddressListModel::CategoryRole).toString(), QStringLiteral("change"));
-    QCOMPARE(model->data(model->index(0), AddressListModel::DisplayAmountRole).toString(), QStringLiteral("₿ 2.00000000"));
+    QCOMPARE(model->data(model->index(0), AddressListModel::DisplayAmountRole).toString(), QStringLiteral("2.00000000 ₿"));
     QCOMPARE(model->data(model->index(0), AddressListModel::HasAmountRole).toBool(), true);
+
+    // The amounts follow the wallet's display unit.
+    wallet_model.setDisplayUnit(2);
+    QCOMPARE(model->data(model->index(0), AddressListModel::DisplayAmountRole).toString(), QStringLiteral("2\u2009000\u2009000.00 bits"));
 }
 
 #ifdef BITCOINQML_NO_TEST_MAIN
