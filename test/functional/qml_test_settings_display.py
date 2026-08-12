@@ -4,8 +4,8 @@
 # file COPYING or http://www.opensource.org/licenses/mit-license.php.
 """End-to-end tests for the Display settings page.
 
-Tests language selection, display unit switching (BTC / SAT), and the
-"Ask before opening links" toggle.
+Tests language selection, display unit switching (BTC / mBTC / bits / SAT),
+and the "Ask before opening links" toggle.
 
 These tests run post-onboarding and do not require a peer connection, but
 they do require the node to start up, so generous wait timeouts are used.
@@ -139,6 +139,49 @@ def test_display_unit_selection(gui):
         gui.click("settingsDisplayUnitBack")
         gui.wait_for_page("gotoDisplayUnit", timeout_ms=5000)
         print("  Reset display unit to BTC  PASSED")
+    finally:
+        try:
+            reset_display_unit_to_btc(gui)
+        except QmlDriverError:
+            pass
+
+
+def test_display_unit_mbtc_and_bits_selection(gui):
+    """Select mBTC and bits on the Display unit page and verify each sticks."""
+    print("\n── test_display_unit_mbtc_and_bits_selection ─────────────────")
+
+    try:
+        gui.click("gotoDisplayUnit")
+        gui.wait_for_page("settingsDisplayUnitPage", timeout_ms=5000)
+
+        # Select mBTC.
+        gui.click("displayUnitMBTC")
+        mbtc_checked = gui.get_property("displayUnitMBTC", "checked")
+        btc_checked = gui.get_property("displayUnitBTC", "checked")
+        assert mbtc_checked, f"mBTC should be checked after clicking, got {mbtc_checked}"
+        assert not btc_checked, f"BTC should be unchecked after selecting mBTC, got {btc_checked}"
+        print(f"  After mBTC selection: mBTC={mbtc_checked}, BTC={btc_checked}  PASSED")
+
+        # Re-navigate before the next selection because clicking a checkable
+        # OptionButton breaks its declarative `checked:` binding.
+        gui.click("settingsDisplayUnitBack")
+        gui.wait_for_page("gotoDisplayUnit", timeout_ms=5000)
+        gui.click("gotoDisplayUnit")
+        gui.wait_for_page("settingsDisplayUnitPage", timeout_ms=5000)
+        assert gui.get_property("displayUnitMBTC", "checked"), (
+            "mBTC selection should persist across page navigation"
+        )
+
+        # Select bits (uBTC).
+        gui.click("displayUnitUBTC")
+        ubtc_checked = gui.get_property("displayUnitUBTC", "checked")
+        mbtc_after = gui.get_property("displayUnitMBTC", "checked")
+        assert ubtc_checked, f"bits should be checked after clicking, got {ubtc_checked}"
+        assert not mbtc_after, f"mBTC should be unchecked after selecting bits, got {mbtc_after}"
+        print(f"  After bits selection: bits={ubtc_checked}, mBTC={mbtc_after}  PASSED")
+
+        gui.click("settingsDisplayUnitBack")
+        gui.wait_for_page("gotoDisplayUnit", timeout_ms=5000)
     finally:
         try:
             reset_display_unit_to_btc(gui)
@@ -293,6 +336,7 @@ def run_tests():
         assert_display_rows_have_no_descriptions(gui)
 
         test_display_unit_selection(gui)
+        test_display_unit_mbtc_and_bits_selection(gui)
         test_language_selection(gui)
 
         # Set known state for persistence test: SAT + Spanish.
