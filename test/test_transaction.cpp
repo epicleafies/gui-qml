@@ -91,7 +91,7 @@ void TransactionTests::fromWalletTx_hidesSenderChangeOutput()
     QCOMPARE(parts.at(0)->debit, -71 * COIN_VALUE);
     QCOMPARE(parts.at(0)->credit, 0);
     QCOMPARE(parts.at(0)->netAmount(), -71 * COIN_VALUE);
-    QCOMPARE(parts.at(0)->prettyAmount(), QStringLiteral("-71.00000000"));
+    QCOMPARE(parts.at(0)->prettyAmount(), QStringLiteral("-71.00000000 ₿"));
 }
 
 void TransactionTests::fromWalletTx_mixedDebitKeepsNegativeNetAmount()
@@ -111,7 +111,7 @@ void TransactionTests::fromWalletTx_mixedDebitKeepsNegativeNetAmount()
     QCOMPARE(parts.at(0)->debit, -100 * COIN_VALUE);
     QCOMPARE(parts.at(0)->credit, 0);
     QCOMPARE(parts.at(0)->netAmount(), -100 * COIN_VALUE);
-    QCOMPARE(parts.at(0)->prettyAmount(), QStringLiteral("-100.00000000"));
+    QCOMPARE(parts.at(0)->prettyAmount(), QStringLiteral("-100.00000000 ₿"));
 }
 
 void TransactionTests::fromWalletTx_showsIncomingPaymentToChangeAddress()
@@ -132,7 +132,7 @@ void TransactionTests::fromWalletTx_showsIncomingPaymentToChangeAddress()
     QCOMPARE(parts.at(0)->debit, 0);
     QCOMPARE(parts.at(0)->credit, 5 * COIN_VALUE);
     QCOMPARE(parts.at(0)->netAmount(), 5 * COIN_VALUE);
-    QCOMPARE(parts.at(0)->prettyAmount(), QStringLiteral("+5.00000000"));
+    QCOMPARE(parts.at(0)->prettyAmount(), QStringLiteral("+5.00000000 ₿"));
 }
 
 #ifdef BITCOINQML_NO_TEST_MAIN

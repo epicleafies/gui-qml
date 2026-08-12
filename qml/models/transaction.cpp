@@ -1,4 +1,4 @@
-// Copyright (c) 2024 The Bitcoin Core developers
+// Copyright (c) 2024-2026 The Bitcoin Core developers
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -53,7 +53,10 @@ QString Transaction::prettyAmount(int display_unit) const
 {
     const CAmount net = netAmount();
     const bool plus_sign = (net > 0);
-    return QmlBitcoinUnits::format(QmlBitcoinUnits::fromDisplayUnit(display_unit), net, plus_sign);
+    const QmlBitcoinUnits::Unit unit = QmlBitcoinUnits::fromDisplayUnit(display_unit);
+    // Append the unit label: a bare number is ambiguous between units,
+    // especially since the display unit is user-configurable.
+    return QmlBitcoinUnits::format(unit, net, plus_sign) + " " + QmlBitcoinUnits::displayLabel(unit, net);
 }
 
 QString Transaction::dateTimeString() const

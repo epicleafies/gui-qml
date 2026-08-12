@@ -1,4 +1,4 @@
-// Copyright (c) 2024-2025 The Bitcoin Core developers
+// Copyright (c) 2024-2026 The Bitcoin Core developers
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -126,6 +126,10 @@ Page {
                 font.family: optionsModel.moneyFont.family
                 font.weight: optionsModel.moneyFont.weight
                 font.pixelSize: 28
+                // The ₿ glyph comes from a fallback font with taller metrics;
+                // pin the line height so the header keeps its size per unit.
+                lineHeight: Theme.text.headline.lineHeight
+                lineHeightMode: Text.FixedHeight
             }
 
             CoreText {
