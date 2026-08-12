@@ -1,4 +1,4 @@
-// Copyright (c) 2024 The Bitcoin Core developers
+// Copyright (c) 2024-2026 The Bitcoin Core developers
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -168,6 +168,11 @@ Button {
                     font.weight: optionsModel.moneyFont.weight
                     font.pixelSize: 15
                     bold: true
+                    // The ₿ glyph comes from a fallback font with taller
+                    // metrics; pin the line height so the badge does not
+                    // resize when the unit changes.
+                    lineHeight: 20
+                    lineHeightMode: Text.FixedHeight
                 }
             }
         }
