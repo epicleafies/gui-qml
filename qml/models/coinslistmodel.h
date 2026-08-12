@@ -1,4 +1,4 @@
-// Copyright (c) 2025 The Bitcoin Core developers
+// Copyright (c) 2025-2026 The Bitcoin Core developers
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -45,6 +45,7 @@ public:
 public Q_SLOTS:
     void update();
     void refreshSelection();
+    void setDisplayUnit(int unit);
     void setSortBy(const QString& roleName);
     void toggleCoinSelection(const int index);
     unsigned int lockedCoinsCount() const;
@@ -66,6 +67,7 @@ private:
     std::vector<std::tuple<CTxDestination, COutPoint, interfaces::WalletTxOut>> m_coins;
     QString m_sort_by;
     CAmount m_total_amount;
+    int m_display_unit{0};
 };
 
 #endif // BITCOIN_QML_MODELS_COINSLISTMODEL_H

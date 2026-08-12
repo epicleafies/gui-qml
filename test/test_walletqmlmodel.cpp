@@ -449,6 +449,7 @@ private Q_SLOTS:
     void scheduleFeeEstimates_invalidatesStalePreviewState();
     void transactionChangedEmitsBalanceChanged();
     void balanceWithUnitFollowsDisplayUnit();
+    void coinsListModelFollowsDisplayUnit();
     void setCurrentPaymentRequestAddressUsesAddressListLabel();
     void commitPaymentRequestUsesSelectedAddressType();
     void usePaymentRequestAsTemplatePreservesAddressType();
@@ -1445,6 +1446,35 @@ void WalletQmlModelTests::commitPaymentRequestUsesSelectedAddressType()
     QCOMPARE(wallet->new_destination_types.front(), OutputType::BECH32M);
     QCOMPARE(wallet->new_destination_labels.size(), size_t{1});
     QCOMPARE(wallet->new_destination_labels.front(), std::string{"typed receive"});
+}
+
+void WalletQmlModelTests::coinsListModelFollowsDisplayUnit()
+{
+    NiceMock<MockWallet>* wallet{nullptr};
+    auto model = MakeWalletModel(wallet);
+
+    interfaces::Wallet::CoinsList coins;
+    interfaces::WalletTxOut tx_out;
+    tx_out.txout = CTxOut{50'000, CScript{}};
+    coins[DecodeDestination(VALID_MAINNET_ADDRESS.toStdString())] = {
+        std::make_tuple(COutPoint{}, tx_out)};
+    ON_CALL(*wallet, listCoins()).WillByDefault(Return(coins));
+
+    auto* coins_model = model->coinsListModel();
+    coins_model->update();
+    QCOMPARE(coins_model->rowCount(), 1);
+    QCOMPARE(coins_model->data(coins_model->index(0, 0), CoinsListModel::AmountRole).toString(),
+             QStringLiteral("0.00050000 ₿"));
+
+    model->setDisplayUnit(3);
+    // 0x2009 is the thin-space group separator used by QmlBitcoinUnits.
+    QCOMPARE(coins_model->data(coins_model->index(0, 0), CoinsListModel::AmountRole).toString(),
+             QStringLiteral("50\u2009000 sats"));
+
+    model->setDisplayUnit(2);
+    QCOMPARE(coins_model->data(coins_model->index(0, 0), CoinsListModel::AmountRole).toString(),
+             QStringLiteral("500.00 bits"));
+    QCOMPARE(coins_model->totalSelected(), QStringLiteral("0.00 bits"));
 }
 
 void WalletQmlModelTests::setCurrentPaymentRequestAddressUsesAddressListLabel()

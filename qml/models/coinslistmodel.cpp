@@ -1,4 +1,4 @@
-// Copyright (c) 2025 The Bitcoin Core developers
+// Copyright (c) 2025-2026 The Bitcoin Core developers
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -34,8 +34,10 @@ QVariant CoinsListModel::data(const QModelIndex& index, int role) const
     switch (role) {
     case AddressRole:
         return QString::fromStdString(EncodeDestination(destination));
-    case AmountRole:
-        return QmlBitcoinUnits::format(QmlBitcoinUnits::Unit::BTC, coin.txout.nValue);
+    case AmountRole: {
+        const QmlBitcoinUnits::Unit unit = QmlBitcoinUnits::fromDisplayUnit(m_display_unit);
+        return QString{QmlBitcoinUnits::format(unit, coin.txout.nValue) + " " + QmlBitcoinUnits::displayLabel(unit, coin.txout.nValue)};
+    }
     case LabelRole:
         return QString::fromStdString("");
     case LockedRole:
@@ -105,6 +107,19 @@ void CoinsListModel::toggleCoinSelection(const int index)
     Q_EMIT selectedCoinsCountChanged();
 }
 
+void CoinsListModel::setDisplayUnit(int unit)
+{
+    if (m_display_unit == unit) {
+        return;
+    }
+    m_display_unit = unit;
+    if (!m_coins.empty()) {
+        Q_EMIT dataChanged(index(0), index(static_cast<int>(m_coins.size()) - 1), {AmountRole});
+    }
+    // totalSelected and changeAmount bindings listen on this signal.
+    Q_EMIT selectedCoinsCountChanged();
+}
+
 void CoinsListModel::refreshSelection()
 {
     CAmount total_amount{0};
@@ -134,14 +149,16 @@ unsigned int CoinsListModel::selectedCoinsCount() const
 
 QString CoinsListModel::totalSelected() const
 {
-    return QmlBitcoinUnits::format(QmlBitcoinUnits::Unit::BTC, m_total_amount);
+    const QmlBitcoinUnits::Unit unit = QmlBitcoinUnits::fromDisplayUnit(m_display_unit);
+    return QmlBitcoinUnits::format(unit, m_total_amount) + " " + QmlBitcoinUnits::displayLabel(unit, m_total_amount);
 }
 
 QString CoinsListModel::changeAmount() const
 {
     CAmount change = m_total_amount - m_wallet_model->sendRecipientList()->totalAmountSatoshi();
     change = std::abs(change);
-    return QmlBitcoinUnits::format(QmlBitcoinUnits::Unit::BTC, change);
+    const QmlBitcoinUnits::Unit unit = QmlBitcoinUnits::fromDisplayUnit(m_display_unit);
+    return QmlBitcoinUnits::format(unit, change) + " " + QmlBitcoinUnits::displayLabel(unit, change);
 }
 
 bool CoinsListModel::overRequiredAmount() const
