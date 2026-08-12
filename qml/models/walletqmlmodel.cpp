@@ -1110,6 +1110,9 @@ bool WalletQmlModel::loadPaymentRequestDetail(const QString& request_id)
     m_detail_payment_request->setLabel(QString::fromStdString(entry->recipient.label));
     m_detail_payment_request->setMessage(QString::fromStdString(entry->recipient.message));
     m_detail_payment_request->setNoteSelf(QString::fromStdString(entry->recipient.noteSelf));
+    // The detail page has no unit binding of its own; without this the
+    // amount always renders in BTC while the edit form follows the setting.
+    m_detail_payment_request->amount()->setUnit(BitcoinAmount::fromDisplayUnit(m_display_unit));
     m_detail_payment_request->amount()->setSatoshi(entry->recipient.amount);
     m_detail_payment_request->setId(static_cast<unsigned int>(entry->id));
     m_detail_payment_request->setCreated(entry->date);
@@ -2261,6 +2264,9 @@ void WalletQmlModel::setDisplayUnit(int unit)
         }
         if (m_bump_transaction_model) {
             m_bump_transaction_model->setDisplayUnit(unit);
+        }
+        if (m_detail_payment_request && m_detail_payment_request->amount()) {
+            m_detail_payment_request->amount()->setUnit(BitcoinAmount::fromDisplayUnit(unit));
         }
         Q_EMIT balanceChanged();
         // The formatted fee estimates depend on the unit; bump the revision

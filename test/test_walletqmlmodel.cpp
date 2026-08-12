@@ -452,6 +452,7 @@ private Q_SLOTS:
     void setCurrentPaymentRequestAddressUsesAddressListLabel();
     void commitPaymentRequestUsesSelectedAddressType();
     void usePaymentRequestAsTemplatePreservesAddressType();
+    void loadPaymentRequestDetailFollowsDisplayUnit();
     void commitPaymentRequestOnLockedWalletSignalsNeedsUnlock();
     void commitPaymentRequestWithPassphraseUnlocksRetriesAndRelocks();
     void commitPaymentRequestWithPassphraseWrongPasswordSurfacesError();
@@ -1482,6 +1483,30 @@ void WalletQmlModelTests::usePaymentRequestAsTemplatePreservesAddressType()
     QVERIFY(model->currentPaymentRequest()->address().isEmpty());
     QCOMPARE(model->currentPaymentRequest()->addressType(), QStringLiteral("p2sh-segwit"));
     QCOMPARE(model->currentPaymentRequest()->label(), QStringLiteral("typed template"));
+}
+
+void WalletQmlModelTests::loadPaymentRequestDetailFollowsDisplayUnit()
+{
+    FakePasswordWallet* wallet{nullptr};
+    auto model = MakeWalletModel(wallet);
+    wallet->get_new_destination_fn = [wallet](OutputType, const std::string& label) -> util::Result<CTxDestination> {
+        ++wallet->get_new_destination_calls;
+        wallet->new_destination_labels.push_back(label);
+        return DecodeDestination(VALID_MAINNET_ADDRESS.toStdString());
+    };
+
+    model->currentPaymentRequest()->amount()->setSatoshi(1250);
+    QVERIFY(model->commitPaymentRequest());
+
+    model->setDisplayUnit(3);
+    QVERIFY(model->loadPaymentRequestDetail(QStringLiteral("1")));
+    QCOMPARE(model->detailPaymentRequest()->amount()->unit(), BitcoinAmount::Unit::SAT);
+    QCOMPARE(model->detailPaymentRequest()->amount()->displayWithUnit(), QStringLiteral("1250 sats"));
+
+    // A unit change while the detail page is open retargets the amount.
+    model->setDisplayUnit(2);
+    QCOMPARE(model->detailPaymentRequest()->amount()->unit(), BitcoinAmount::Unit::uBTC);
+    QCOMPARE(model->detailPaymentRequest()->amount()->displayWithUnit(), QStringLiteral("12.50 bits"));
 }
 
 void WalletQmlModelTests::commitPaymentRequestOnLockedWalletSignalsNeedsUnlock()
