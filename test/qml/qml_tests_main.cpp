@@ -149,6 +149,9 @@ class MockBitcoinAmount : public QObject
     Q_PROPERTY(qint64 satoshi READ satoshi WRITE setSatoshi NOTIFY amountChanged)
     Q_PROPERTY(QString unitLabel READ unitLabel NOTIFY unitChanged)
     Q_PROPERTY(QString displayWithUnit READ displayWithUnit NOTIFY displayChanged)
+    Q_PROPERTY(QString inputPlaceholder READ inputPlaceholder NOTIFY unitChanged)
+    Q_PROPERTY(QString inputPattern READ inputPattern NOTIFY unitChanged)
+    Q_PROPERTY(int maximumInputLength READ maximumInputLength NOTIFY unitChanged)
 
 public:
     enum Unit {
@@ -194,6 +197,21 @@ public:
         const qint64 sats = satoshi();
         return sats == 1 || sats == -1 ? QStringLiteral("sat") : QStringLiteral("sats");
     }
+    QString inputPlaceholder() const
+    {
+        if (m_unit == SAT) return QStringLiteral("0");
+        if (m_unit == uBTC) return QStringLiteral("0.00");
+        if (m_unit == mBTC) return QStringLiteral("0.00000");
+        return QStringLiteral("0.00000000");
+    }
+    QString inputPattern() const
+    {
+        if (m_unit == SAT) return QStringLiteral("^0*\\d{0,16}$");
+        if (m_unit == uBTC) return QStringLiteral("^0*\\d{0,14}(\\.\\d{0,2})?$");
+        if (m_unit == mBTC) return QStringLiteral("^0*\\d{0,11}(\\.\\d{0,5})?$");
+        return QStringLiteral("^0*\\d{0,8}(\\.\\d{0,8})?$");
+    }
+    int maximumInputLength() const { return m_unit == SAT ? 16 : 17; }
     void setSatoshi(qint64 sats)
     {
         const QString updated = displayForSatoshi(sats);
@@ -220,9 +238,22 @@ public:
         Q_EMIT displayChanged();
         Q_EMIT amountChanged();
     }
-    Q_INVOKABLE void flipUnit()
+    Q_INVOKABLE void cycleUnit(int default_display_unit)
     {
-        setUnit(m_unit == BTC ? SAT : BTC);
+        Unit members[3];
+        int count = 0;
+        members[count++] = BTC;
+        if (default_display_unit == 1 || default_display_unit == 2) {
+            members[count++] = default_display_unit == 1 ? mBTC : uBTC;
+        }
+        members[count++] = SAT;
+        for (int i = 0; i < count; ++i) {
+            if (members[i] == m_unit) {
+                setUnit(members[(i + 1) % count]);
+                return;
+            }
+        }
+        setUnit(BTC);
     }
 
 Q_SIGNALS:
@@ -1829,6 +1860,7 @@ class MockOptionsModel : public QObject
     Q_PROPERTY(QString dataDir MEMBER m_data_dir NOTIFY dataDirChanged)
     Q_PROPERTY(QString getDefaultDataDirString READ getDefaultDataDirString CONSTANT)
     Q_PROPERTY(int displayUnit READ displayUnit WRITE setDisplayUnit NOTIFY displayUnitChanged)
+    Q_PROPERTY(int defaultDisplayUnit READ defaultDisplayUnit WRITE setDefaultDisplayUnit NOTIFY defaultDisplayUnitChanged)
     Q_PROPERTY(QString displayUnitLabel READ displayUnitLabel NOTIFY displayUnitChanged)
     Q_PROPERTY(QString languageSummary READ languageSummary NOTIFY languageChanged)
     Q_PROPERTY(QString language READ language WRITE setLanguage NOTIFY languageChanged)
@@ -2041,6 +2073,11 @@ public:
     void setDisplayUnit(int u) {
         if (u != m_displayUnit) { m_displayUnit = u; Q_EMIT displayUnitChanged(u); }
     }
+    int defaultDisplayUnit() const { return m_defaultDisplayUnit; }
+    void setDefaultDisplayUnit(int u) {
+        if (u != m_defaultDisplayUnit) { m_defaultDisplayUnit = u; Q_EMIT defaultDisplayUnitChanged(u); }
+        setDisplayUnit(u);
+    }
     QString displayUnitLabel() const
     {
         if (m_displayUnit == 1) return QStringLiteral("mBTC");
@@ -2103,6 +2140,7 @@ Q_SIGNALS:
     void pruneSizeGBChanged();
     void dataDirChanged();
     void displayUnitChanged(int unit);
+    void defaultDisplayUnitChanged(int unit);
     void languageChanged();
     void connectionSettingsDirtyChanged();
     void storageSettingsDirtyChanged();
@@ -2123,6 +2161,7 @@ Q_SIGNALS:
 
 private:
     int m_displayUnit{0};
+    int m_defaultDisplayUnit{0};
     QString m_language;
 };
 

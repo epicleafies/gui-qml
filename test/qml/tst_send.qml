@@ -199,6 +199,68 @@ TestCase {
         }
     }
 
+    function test_amount_input_rules_follow_display_unit() {
+        const page = createTemporaryObject(sendComponent, testWindow.contentItem)
+        verify(page !== null)
+
+        const amountInput = findChild(page, "sendAmountInput")
+        verify(amountInput !== null)
+
+        // BitcoinAmount.mBTC / BitcoinAmount.uBTC are not resolvable from QML
+        // (lowercase-initial enum values), so use the display unit integers:
+        // 0 = BTC, 1 = mBTC, 2 = uBTC (bits), 3 = SAT.
+        optionsModel.displayUnit = 1
+        tryCompare(amountInput, "placeholderText", "0.00000")
+        compare(amountInput.maximumLength, 17)
+
+        optionsModel.displayUnit = 2
+        tryCompare(amountInput, "placeholderText", "0.00")
+        compare(amountInput.maximumLength, 17)
+
+        optionsModel.displayUnit = 3
+        tryCompare(amountInput, "placeholderText", "0")
+        compare(amountInput.maximumLength, 16)
+
+        optionsModel.displayUnit = 0
+        tryCompare(amountInput, "placeholderText", "0.00000000")
+        compare(amountInput.maximumLength, 17)
+    }
+
+    function test_amount_unit_toggle_is_local_to_the_field() {
+        const page = createTemporaryObject(sendComponent, testWindow.contentItem)
+        verify(page !== null)
+
+        const unitToggle = findChild(page, "sendAmountUnitToggle")
+        const unitLabel = findChild(page, "sendAmountUnitLabel")
+        verify(unitToggle !== null)
+        verify(unitLabel !== null)
+
+        try {
+            // The toggle cycles only this field's unit; the persisted display
+            // unit must not change. With BTC as the default it is a two-way
+            // flip between BTC and sat.
+            compare(unitLabel.text, "BTC")
+            unitToggle.click()
+            tryCompare(unitLabel, "text", "sats")
+            compare(optionsModel.displayUnit, 0)
+            unitToggle.click()
+            tryCompare(unitLabel, "text", "BTC")
+
+            // With bits as the default (display unit integer 2), the cycle
+            // includes bits: BTC -> bits -> sat -> BTC.
+            optionsModel.defaultDisplayUnit = 2
+            tryCompare(unitLabel, "text", "bits")
+            unitToggle.click()
+            tryCompare(unitLabel, "text", "sats")
+            unitToggle.click()
+            tryCompare(unitLabel, "text", "BTC")
+            unitToggle.click()
+            tryCompare(unitLabel, "text", "bits")
+        } finally {
+            optionsModel.defaultDisplayUnit = 0
+        }
+    }
+
     function test_send_continue_button_tracks_recipient_validity() {
         const page = createTemporaryObject(sendComponent, this)
         verify(page !== null)

@@ -21,7 +21,7 @@ ColumnLayout {
     property alias unitLabelObjectName: unitLabel.objectName
     property alias errorTextObjectName: errorTextLabel.objectName
     property bool enabled: true
-    property string placeholderText: root.amount ? root.amountInputPlaceholder(root.amount.unit) : "0.00000000"
+    property string placeholderText: root.amount ? root.amount.inputPlaceholder : "0.00000000"
 
     signal inputTextChanged
     signal textEdited
@@ -29,31 +29,6 @@ ColumnLayout {
 
     function syncFromAmount(force) {
         amountInput.syncFromAmount(force)
-    }
-
-    function amountInputPlaceholder(unit) {
-        if (unit === BitcoinAmount.SAT) return "0"
-        if (unit === BitcoinAmount.uBTC) return "0.00"
-        if (unit === BitcoinAmount.mBTC) return "0.00000"
-        return "0.00000000"
-    }
-
-    function amountInputPattern(unit) {
-        if (unit === BitcoinAmount.SAT) return /^0*\d{0,16}$/
-        if (unit === BitcoinAmount.uBTC) return /^0*\d{0,13}(\.\d{0,2})?$/
-        if (unit === BitcoinAmount.mBTC) return /^0*\d{0,10}(\.\d{0,5})?$/
-        return /^0*\d{0,7}(\.\d{0,8})?$/
-    }
-
-    function amountInputMaximumLength(unit) {
-        if (unit === BitcoinAmount.SAT) return 16
-        if (unit === BitcoinAmount.uBTC) return 17
-        if (unit === BitcoinAmount.mBTC) return 17
-        return 17
-    }
-
-    function flippedDisplayUnit(unit) {
-        return unit === BitcoinAmount.SAT ? BitcoinAmount.BTC : BitcoinAmount.SAT
     }
 
     Layout.fillWidth: true
@@ -146,9 +121,9 @@ ColumnLayout {
             }
 
             validator: RegularExpressionValidator {
-                regularExpression: root.amount ? root.amountInputPattern(root.amount.unit) : /^(0|[1-9]\d{0,7})(\.\d{0,8})?$/
+                regularExpression: root.amount ? new RegExp(root.amount.inputPattern) : /^(0|[1-9]\d{0,7})(\.\d{0,8})?$/
             }
-            maximumLength: root.amount ? root.amountInputMaximumLength(root.amount.unit) : 17
+            maximumLength: root.amount ? root.amount.maximumInputLength : 17
 
             Connections {
                 target: root
@@ -179,7 +154,9 @@ ColumnLayout {
             function click() {
                 if (!root.enabled || !root.amount) return
                 amountInput.commitAmountText()
-                optionsModel.displayUnit = root.flippedDisplayUnit(root.amount.unit)
+                // Cycle only this field's unit; the persisted display unit
+                // is changed from the settings page.
+                root.amount.cycleUnit(optionsModel.defaultDisplayUnit)
             }
 
             MouseArea {
@@ -187,10 +164,7 @@ ColumnLayout {
                 hoverEnabled: true
                 cursorShape: Qt.PointingHandCursor
                 enabled: root.enabled && root.amount
-                onClicked: {
-                    amountInput.commitAmountText()
-                    optionsModel.displayUnit = root.flippedDisplayUnit(root.amount.unit)
-                }
+                onClicked: parent.click()
             }
 
             CoreText {

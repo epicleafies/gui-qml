@@ -430,10 +430,18 @@ def set_multiple_recipients(gui, enabled):
 
 
 def set_amount_unit(gui, unit_label):
-    current = gui.get_property("sendAmountUnitLabel", "text")
-    if current != unit_label:
+    # The unit toggle cycles the field through BTC, sat, and the default
+    # display unit when that is mBTC or bits, so click until the
+    # requested unit comes around.
+    for _ in range(4):
+        current = gui.get_property("sendAmountUnitLabel", "text")
+        if current == unit_label:
+            return
         gui.click("sendAmountUnitToggle")
-        gui.wait_for_property("sendAmountUnitLabel", "text", unit_label, timeout_ms=5000)
+        gui.wait_for_property(
+            "sendAmountUnitLabel", "text",
+            lambda label: label != current, timeout_ms=5000)
+    raise AssertionError(f"amount unit toggle never reached {unit_label!r}")
 
 
 def open_external_signer_review(gui, destination_address, amount_text):

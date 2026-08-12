@@ -200,10 +200,18 @@ def set_amount_unit(gui, unit_label):
             return label in ("sat", "sats")
         return label == unit_label
 
-    current = gui.get_property("sendAmountUnitLabel", "text")
-    if not matches(current):
+    # The unit toggle cycles the field through BTC, sat, and the default
+    # display unit when that is mBTC or bits, so click until the
+    # requested unit comes around.
+    for _ in range(4):
+        current = gui.get_property("sendAmountUnitLabel", "text")
+        if matches(current):
+            return
         gui.click("sendAmountUnitToggle")
-        gui.wait_for_property("sendAmountUnitLabel", "text", matches, timeout_ms=5000)
+        gui.wait_for_property(
+            "sendAmountUnitLabel", "text",
+            lambda label: label != current, timeout_ms=5000)
+    raise AssertionError(f"amount unit toggle never reached {unit_label!r}")
 
 
 def prepare_single_send(gui, address, amount, amount_unit="btc"):

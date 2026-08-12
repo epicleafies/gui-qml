@@ -34,8 +34,8 @@ Page {
             Layout.fillWidth: true
             text: qsTr("BTC")
             description: qsTr("8 decimal places (0.00000001 BTC = 1 sat)")
-            checked: optionsModel.displayUnit === 0
-            onClicked: optionsModel.displayUnit = 0
+            checked: optionsModel.defaultDisplayUnit === 0
+            onClicked: optionsModel.defaultDisplayUnit = 0
         }
 
         OptionButton {
@@ -43,8 +43,8 @@ Page {
             Layout.fillWidth: true
             text: qsTr("mBTC")
             description: qsTr("5 decimal places (0.00001 mBTC = 1 sat)")
-            checked: optionsModel.displayUnit === 1
-            onClicked: optionsModel.displayUnit = 1
+            checked: optionsModel.defaultDisplayUnit === 1
+            onClicked: optionsModel.defaultDisplayUnit = 1
         }
 
         OptionButton {
@@ -52,8 +52,8 @@ Page {
             Layout.fillWidth: true
             text: qsTr("bits")
             description: qsTr("2 decimal places (0.01 bits = 1 sat)")
-            checked: optionsModel.displayUnit === 2
-            onClicked: optionsModel.displayUnit = 2
+            checked: optionsModel.defaultDisplayUnit === 2
+            onClicked: optionsModel.defaultDisplayUnit = 2
         }
 
         OptionButton {
@@ -61,8 +61,8 @@ Page {
             Layout.fillWidth: true
             text: qsTr("sat")
             description: qsTr("Satoshi, the smallest unit (1 sat = 0.00000001 BTC)")
-            checked: optionsModel.displayUnit === 3
-            onClicked: optionsModel.displayUnit = 3
+            checked: optionsModel.defaultDisplayUnit === 3
+            onClicked: optionsModel.defaultDisplayUnit = 3
         }
     }
 }
