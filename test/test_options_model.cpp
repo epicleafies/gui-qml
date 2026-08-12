@@ -124,6 +124,7 @@ private Q_SLOTS:
     void displayUnitUsesQtCompatibleSettingsKey();
     void displayUnitUsesLegacyQtFallback();
     void displayUnitPrefersQmlSettingOverLegacyQtFallback();
+    void defaultDisplayUnitPersistsAndSwitches();
     void sharedCoreSettingHelpersDeduplicateOverrides();
     void parameterInteractionOverridesPersistExplicitValues();
     void coreSettingsLegacyNumericOverridesWriteStrings();
@@ -2327,6 +2328,54 @@ void OptionsModelTests::displayUnitUsesQtCompatibleSettingsKey()
         settings.setValue(SettingsKeys::DISPLAY_UNIT, previous_display_unit_setting);
     } else {
         settings.remove(SettingsKeys::DISPLAY_UNIT);
+    }
+}
+
+void OptionsModelTests::defaultDisplayUnitPersistsAndSwitches()
+{
+    using ::testing::_;
+    using ::testing::NiceMock;
+    using ::testing::Return;
+
+    QSettings settings;
+    const bool had_display_unit_setting = settings.contains(SettingsKeys::DISPLAY_UNIT);
+    const QVariant previous_display_unit_setting = settings.value(SettingsKeys::DISPLAY_UNIT);
+    const bool had_default_unit_setting = settings.contains(SettingsKeys::DEFAULT_DISPLAY_UNIT);
+    const QVariant previous_default_unit_setting = settings.value(SettingsKeys::DEFAULT_DISPLAY_UNIT);
+    settings.setValue(SettingsKeys::DISPLAY_UNIT, 1);
+    settings.remove(SettingsKeys::DEFAULT_DISPLAY_UNIT);
+
+    NiceMock<MockNode> node;
+    ON_CALL(node, getPersistentSetting(_)).WillByDefault(Return(common::SettingsValue{}));
+
+    {
+        // Settings written before the default unit existed: the default falls
+        // back to the persisted display unit, keeping mBTC as the default.
+        OptionsQmlModel model(node);
+        QCOMPARE(model.defaultDisplayUnit(), 1);
+    }
+
+    // Choosing a default persists it and switches the display unit to it.
+    OptionsQmlModel model(node);
+    model.setDefaultDisplayUnit(2);
+    QCOMPARE(model.defaultDisplayUnit(), 2);
+    QCOMPARE(model.displayUnit(), 2);
+    QCOMPARE(settings.value(SettingsKeys::DEFAULT_DISPLAY_UNIT).toInt(), 2);
+
+    // An out-of-range default normalizes to BTC.
+    model.setDefaultDisplayUnit(9);
+    QCOMPARE(model.defaultDisplayUnit(), 0);
+    QCOMPARE(model.displayUnit(), 0);
+
+    if (had_display_unit_setting) {
+        settings.setValue(SettingsKeys::DISPLAY_UNIT, previous_display_unit_setting);
+    } else {
+        settings.remove(SettingsKeys::DISPLAY_UNIT);
+    }
+    if (had_default_unit_setting) {
+        settings.setValue(SettingsKeys::DEFAULT_DISPLAY_UNIT, previous_default_unit_setting);
+    } else {
+        settings.remove(SettingsKeys::DEFAULT_DISPLAY_UNIT);
     }
 }
 

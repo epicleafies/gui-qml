@@ -49,12 +49,12 @@ public:
     bool isSet() const { return m_isSet; }
 
     Q_INVOKABLE void format();
+    Q_INVOKABLE void cycleUnit(int default_display_unit);
 
     static QString satsToBtcString(qint64 sat);
     static Unit fromDisplayUnit(int display_unit);
 
 public Q_SLOTS:
-    void flipUnit();
     void clear();
 
 Q_SIGNALS:

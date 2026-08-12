@@ -23,7 +23,7 @@ private Q_SLOTS:
     void display_flow_mbtc_and_ubtc();
     void display_flow_sat();
     void displayWithUnit_formatsAmountAndUnit();
-    void flipUnit_changesLabelAndDisplaySignal();
+    void cycleUnit_gatesOnDefaultDisplayUnit();
     void inputRules_followUnit();
     void fromDisplayUnit_mapsAndClampsToBtc();
 };
@@ -125,13 +125,37 @@ void BitcoinAmountTests::displayWithUnit_formatsAmountAndUnit()
     QCOMPARE(amt.displayWithUnit(), QStringLiteral("1 sat"));
 }
 
-void BitcoinAmountTests::flipUnit_changesLabelAndDisplaySignal()
+void BitcoinAmountTests::cycleUnit_gatesOnDefaultDisplayUnit()
 {
     BitcoinAmount amt;
     amt.setSatoshi(100);
     QSignalSpy spy(&amt, &BitcoinAmount::displayChanged);
-    amt.flipUnit();
-    QVERIFY(spy.count() >= 1);
+
+    // With BTC (or sat) as the default the cycle is a two-way flip.
+    amt.cycleUnit(0);
+    QCOMPARE(amt.unit(), BitcoinAmount::Unit::SAT);
+    amt.cycleUnit(0);
+    QCOMPARE(amt.unit(), BitcoinAmount::Unit::BTC);
+    QVERIFY(spy.count() >= 2);
+
+    // With bits as the default the cycle is BTC -> bits -> sat -> BTC.
+    amt.cycleUnit(2);
+    QCOMPARE(amt.unit(), BitcoinAmount::Unit::uBTC);
+    amt.cycleUnit(2);
+    QCOMPARE(amt.unit(), BitcoinAmount::Unit::SAT);
+    amt.cycleUnit(2);
+    QCOMPARE(amt.unit(), BitcoinAmount::Unit::BTC);
+
+    // Same for mBTC as the default.
+    amt.cycleUnit(1);
+    QCOMPARE(amt.unit(), BitcoinAmount::Unit::mBTC);
+    amt.cycleUnit(1);
+    QCOMPARE(amt.unit(), BitcoinAmount::Unit::SAT);
+
+    // A unit no longer in the cycle (default changed away) falls back to BTC.
+    amt.setUnit(BitcoinAmount::Unit::mBTC);
+    amt.cycleUnit(0);
+    QCOMPARE(amt.unit(), BitcoinAmount::Unit::BTC);
 }
 
 void BitcoinAmountTests::inputRules_followUnit()

@@ -159,9 +159,26 @@ BitcoinAmount::Unit BitcoinAmount::fromDisplayUnit(int display_unit)
     return Unit::BTC;
 }
 
-void BitcoinAmount::flipUnit()
+void BitcoinAmount::cycleUnit(int default_display_unit)
 {
-    setUnit(m_unit == Unit::SAT ? Unit::BTC : Unit::SAT);
+    // The amount field toggle cycles BTC and sat, plus the default unit
+    // when the user chose mBTC or bits in the display settings. The change
+    // is local to this amount; the persisted display unit only changes from
+    // the settings page.
+    Unit members[3];
+    int count = 0;
+    members[count++] = Unit::BTC;
+    if (default_display_unit == 1 || default_display_unit == 2) {
+        members[count++] = fromDisplayUnit(default_display_unit);
+    }
+    members[count++] = Unit::SAT;
+    for (int i = 0; i < count; ++i) {
+        if (members[i] == m_unit) {
+            setUnit(members[(i + 1) % count]);
+            return;
+        }
+    }
+    setUnit(Unit::BTC);
 }
 
 QString BitcoinAmount::satsToBtcString(qint64 sat)
