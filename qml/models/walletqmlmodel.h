@@ -1,4 +1,4 @@
-// Copyright (c) 2024 The Bitcoin Core developers
+// Copyright (c) 2024-2026 The Bitcoin Core developers
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -115,6 +115,7 @@ public:
     QString displayName() const;
     void setDisplayName(const QString& display_name);
     QString balance() const;
+    QString balanceWithUnit() const;
     qint64 balanceSatoshi() const;
     bool hasExternalSigner() const { return m_wallet && m_wallet->hasExternalSigner(); }
     Q_INVOKABLE bool commitPaymentRequest();

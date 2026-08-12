@@ -43,6 +43,7 @@ class WalletQmlController : public QObject
     Q_PROPERTY(QString externalSignerError READ externalSignerError NOTIFY externalSignerStatusChanged)
     Q_PROPERTY(QString suggestedExternalSignerWalletName READ suggestedExternalSignerWalletName NOTIFY externalSignerStatusChanged)
     Q_PROPERTY(QString walletLocationOpenError READ walletLocationOpenError NOTIFY walletLocationOpenErrorChanged)
+    Q_PROPERTY(int displayUnit READ displayUnit WRITE setDisplayUnit NOTIFY displayUnitChanged)
 
 public:
     using OpenLocalPathFn = std::function<bool(const QString&)>;
@@ -76,6 +77,8 @@ public:
     Q_INVOKABLE void requestClosePaymentRequestDetail();
 
     WalletQmlModel* selectedWallet() const;
+    int displayUnit() const { return m_display_unit; }
+    void setDisplayUnit(int unit);
     void unloadWallets();
     bool initialized() const { return m_initialized; }
     bool isWalletLoaded() const { return m_is_wallet_loaded; }
@@ -102,6 +105,7 @@ public:
 
 Q_SIGNALS:
     void selectedWalletChanged();
+    void displayUnitChanged(int unit);
     void initializedChanged();
     void isWalletLoadedChanged();
     void noWalletsFoundChanged();
@@ -186,6 +190,7 @@ private:
     QThread* m_worker_thread;
     mutable QMutex m_wallets_mutex;
     std::vector<WalletQmlModel*> m_wallets;
+    int m_display_unit{0};
     std::unique_ptr<interfaces::Handler> m_handler_load_wallet;
     bool m_is_wallet_loaded{false};
     bool m_no_wallets_found{false};

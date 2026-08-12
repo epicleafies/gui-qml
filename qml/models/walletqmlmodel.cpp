@@ -514,6 +514,16 @@ QString WalletQmlModel::balance() const
     return QmlBitcoinUnits::format(QmlBitcoinUnits::fromDisplayUnit(m_display_unit), m_wallet->getBalance());
 }
 
+QString WalletQmlModel::balanceWithUnit() const
+{
+    // Label the number with the unit it was formatted in, so consumers that
+    // only get the string (for example the wallet select popup) cannot pair
+    // it with the wrong unit.
+    const CAmount amount = m_wallet ? m_wallet->getBalance() : 0;
+    const QmlBitcoinUnits::Unit unit = QmlBitcoinUnits::fromDisplayUnit(m_display_unit);
+    return QmlBitcoinUnits::format(unit, amount) + " " + QmlBitcoinUnits::displayLabel(unit, amount);
+}
+
 qint64 WalletQmlModel::balanceSatoshi() const
 {
     if (!m_wallet) {

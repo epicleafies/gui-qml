@@ -126,12 +126,30 @@ bool WalletQmlController::isWalletOpen(const QString& path)
     return false;
 }
 
+void WalletQmlController::setDisplayUnit(int unit)
+{
+    if (unit == m_display_unit) return;
+    m_display_unit = unit;
+    // Apply to every open wallet, not only the selected one: the wallet
+    // select popup shows all of their balances. Each model re-emits
+    // balanceChanged, which republishes its wallet info.
+    std::vector<WalletQmlModel*> snapshot;
+    {
+        QMutexLocker locker(&m_wallets_mutex);
+        snapshot = m_wallets;
+    }
+    for (WalletQmlModel* wallet_model : snapshot) {
+        wallet_model->setDisplayUnit(unit);
+    }
+    Q_EMIT displayUnitChanged(unit);
+}
+
 void WalletQmlController::publishWalletInfo(WalletQmlModel* wallet_model)
 {
     if (!wallet_model) return;
     Q_EMIT walletInfoChanged(
         wallet_model->name(),
-        wallet_model->balance(),
+        wallet_model->balanceWithUnit(),
         static_cast<int>(wallet_model->keySchemeKind()));
 }
 
@@ -319,6 +337,7 @@ void WalletQmlController::unloadWallets()
 
 void WalletQmlController::registerWalletModel(WalletQmlModel* wallet_model)
 {
+    wallet_model->setDisplayUnit(m_display_unit);
     connect(wallet_model, &WalletQmlModel::walletUnloaded, this, [this, wallet_model]() {
         removeWalletModel(wallet_model);
     }, Qt::QueuedConnection);

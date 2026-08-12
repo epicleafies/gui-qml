@@ -207,7 +207,8 @@ def case_selector_loads_closed_wallet(harness, checkpoints):
     )
     checkpoints.checkpoint("badge reflects newly loaded wallet", gui)
 
-    # Reopen the selector — the wallet now reports Open with a balance prefix.
+    # Reopen the selector — the wallet now reports Open with its balance,
+    # formatted as "<amount> <unit label>" in the current display unit.
     open_wallet_selector(gui)
     gui.settle()
     open_state = gui.get_property(row_object, "loadState")
@@ -215,8 +216,8 @@ def case_selector_loads_closed_wallet(harness, checkpoints):
         f"Expected loadState=Open ({LOAD_STATE_OPEN}) after load, got {open_state}"
     )
     open_text = gui.get_text(status_object)
-    assert open_text.startswith("₿"), (
-        f"Expected status line to start with '₿ <balance>' once loaded, got {open_text!r}"
+    assert open_text[:1].isdigit() and open_text.endswith(" ₿"), (
+        f"Expected status line to show '<balance> ₿' once loaded, got {open_text!r}"
     )
     checkpoints.checkpoint("loaded wallet shows balance in selector", gui)
 

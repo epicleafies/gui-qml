@@ -1361,6 +1361,7 @@ class MockWalletController : public QObject
     Q_PROPERTY(int closeWalletCalls READ closeWalletCalls NOTIFY closeWalletCallsChanged)
     Q_PROPERTY(QObject* selectedWallet READ selectedWallet NOTIFY selectedWalletChanged)
     Q_PROPERTY(int closePaymentRequestDetailRequests MEMBER m_close_payment_request_detail_requests NOTIFY closePaymentRequestDetailRequestsChanged)
+    Q_PROPERTY(int displayUnit MEMBER m_controller_display_unit NOTIFY displayUnitChanged)
     Q_PROPERTY(int openReceiveRequests MEMBER m_open_receive_requests NOTIFY openReceiveRequestsChanged)
     Q_PROPERTY(QString walletLocationOpenError READ walletLocationOpenError NOTIFY walletLocationOpenErrorChanged)
     Q_PROPERTY(int openSelectedWalletLocationCalls READ openSelectedWalletLocationCalls NOTIFY openSelectedWalletLocationCallsChanged)
@@ -1387,6 +1388,7 @@ public:
     int m_close_wallet_calls{0};
     int m_close_payment_request_detail_requests{0};
     int m_open_receive_requests{0};
+    int m_controller_display_unit{0};
     QString m_wallet_location_open_error;
     bool m_open_selected_wallet_location_result{true};
     QString m_open_selected_wallet_location_error;
@@ -1587,6 +1589,7 @@ Q_SIGNALS:
     void lastClosedWalletNameChanged();
     void closeWalletCallsChanged();
     void selectedWalletChanged();
+    void displayUnitChanged();
     void closePaymentRequestDetailRequestsChanged();
     void closePaymentRequestDetailRequested();
     void openReceiveRequestsChanged();

@@ -1,4 +1,4 @@
-// Copyright (c) 2024 The Bitcoin Core developers
+// Copyright (c) 2024-2026 The Bitcoin Core developers
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -129,7 +129,8 @@ Popup {
                     case WalletListModel.LoadError:
                         return qsTr("Failed to open wallet")
                     case WalletListModel.Open:
-                        return "₿ " + balance
+                        // The balance string carries its own unit label.
+                        return balance
                     case WalletListModel.Closed:
                     default:
                         return qsTr("Closed")

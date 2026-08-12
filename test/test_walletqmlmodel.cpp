@@ -448,6 +448,7 @@ private Q_SLOTS:
     void scheduleFeeEstimates_debouncesRapidRestarts();
     void scheduleFeeEstimates_invalidatesStalePreviewState();
     void transactionChangedEmitsBalanceChanged();
+    void balanceWithUnitFollowsDisplayUnit();
     void setCurrentPaymentRequestAddressUsesAddressListLabel();
     void commitPaymentRequestUsesSelectedAddressType();
     void usePaymentRequestAsTemplatePreservesAddressType();
@@ -1408,6 +1409,20 @@ void WalletQmlModelTests::transactionChangedEmitsBalanceChanged()
 
     QTRY_COMPARE(balance_spy.count(), 1);
     QCOMPARE(model.balance(), QStringLiteral("75.00000000"));
+}
+
+void WalletQmlModelTests::balanceWithUnitFollowsDisplayUnit()
+{
+    auto wallet = std::make_unique<NiceMock<MockWallet>>();
+    ON_CALL(*wallet, getBalance()).WillByDefault(Return(123));
+
+    WalletQmlModel model{std::move(wallet)};
+
+    QCOMPARE(model.balanceWithUnit(), QStringLiteral("0.00000123 ₿"));
+    model.setDisplayUnit(3);
+    QCOMPARE(model.balanceWithUnit(), QStringLiteral("123 sats"));
+    model.setDisplayUnit(2);
+    QCOMPARE(model.balanceWithUnit(), QStringLiteral("1.23 bits"));
 }
 
 void WalletQmlModelTests::commitPaymentRequestUsesSelectedAddressType()

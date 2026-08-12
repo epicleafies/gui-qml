@@ -21,6 +21,15 @@ Page {
 
     ButtonGroup { id: navigationTabs }
 
+    // Push the display unit into the wallet controller from the wallet root,
+    // so every open wallet model follows it regardless of which page is
+    // alive. The controller fans it out to all wallets, selected or not.
+    Binding {
+        target: walletController
+        property: "displayUnit"
+        value: optionsModel.displayUnit
+    }
+
     signal addWallet()
     signal sendTransaction(bool multipleRecipientsEnabled)
 
