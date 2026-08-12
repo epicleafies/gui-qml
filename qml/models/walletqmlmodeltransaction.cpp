@@ -4,7 +4,6 @@
 
 #include <qml/models/walletqmlmodeltransaction.h>
 
-#include <qml/bitcoinunits.h>
 #include <qml/models/sendrecipient.h>
 #include <qml/models/sendrecipientslistmodel.h>
 
@@ -33,18 +32,6 @@ BitcoinAmount* WalletQmlModelTransaction::amountAmount() const
     return m_amount_amount;
 }
 
-QString WalletQmlModelTransaction::formatWithUnit(CAmount value, int display_unit)
-{
-    const QmlBitcoinUnits::Unit unit = QmlBitcoinUnits::fromDisplayUnit(display_unit);
-    const QString num = QmlBitcoinUnits::format(unit, value, false, QmlBitcoinUnits::SeparatorStyle::STANDARD);
-    return num + " " + QmlBitcoinUnits::displayLabel(unit, value);
-}
-
-QString WalletQmlModelTransaction::amount() const
-{
-    return formatWithUnit(m_amount, m_display_unit);
-}
-
 BitcoinAmount* WalletQmlModelTransaction::feeAmount() const
 {
     return m_fee_amount;
@@ -53,16 +40,6 @@ BitcoinAmount* WalletQmlModelTransaction::feeAmount() const
 BitcoinAmount* WalletQmlModelTransaction::totalAmount() const
 {
     return m_total_amount;
-}
-
-QString WalletQmlModelTransaction::fee() const
-{
-    return formatWithUnit(m_fee, m_display_unit);
-}
-
-QString WalletQmlModelTransaction::total() const
-{
-    return formatWithUnit(m_amount + m_fee, m_display_unit);
 }
 
 QString WalletQmlModelTransaction::label() const
@@ -78,9 +55,6 @@ void WalletQmlModelTransaction::setDisplayUnit(int unit)
         m_amount_amount->setUnit(amount_unit);
         m_fee_amount->setUnit(amount_unit);
         m_total_amount->setUnit(amount_unit);
-        Q_EMIT amountChanged();
-        Q_EMIT feeChanged();
-        Q_EMIT totalChanged();
     }
 }
 
