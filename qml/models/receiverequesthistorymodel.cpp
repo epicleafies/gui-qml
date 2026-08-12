@@ -57,7 +57,7 @@ QVariant ReceiveRequestHistoryModel::dataForEntry(const QmlRecentRequestEntry& e
     case AmountSatRole:
         return QVariant::fromValue<qlonglong>(entry.recipient.amount);
     case AmountDisplayRole:
-        return FormatAmountBtc(entry.recipient.amount);
+        return formatAmountDisplay(entry.recipient.amount);
     case UriRole:
         return BuildBitcoinUri(QString::fromStdString(entry.recipient.address),
                                entry.recipient.amount,
@@ -226,6 +226,26 @@ std::string ReceiveRequestHistoryModel::SerializeEntry(const QmlRecentRequestEnt
     return ss.str();
 }
 
+QString ReceiveRequestHistoryModel::formatAmountDisplay(CAmount amount_sats) const
+{
+    if (amount_sats <= 0) return {};
+    const QmlBitcoinUnits::Unit unit = QmlBitcoinUnits::fromDisplayUnit(m_display_unit);
+    return QString{QmlBitcoinUnits::format(unit, amount_sats) + " " + QmlBitcoinUnits::displayLabel(unit, amount_sats)};
+}
+
+void ReceiveRequestHistoryModel::setDisplayUnit(int unit)
+{
+    if (m_display_unit == unit) {
+        return;
+    }
+    m_display_unit = unit;
+    if (!m_entries.empty()) {
+        Q_EMIT dataChanged(index(0), index(static_cast<int>(m_entries.size()) - 1), {AmountDisplayRole});
+    }
+}
+
+// The BIP21 URI amount is always denominated in BTC per the spec; it must not
+// follow the display unit.
 QString ReceiveRequestHistoryModel::FormatAmountBtc(CAmount amount_sats)
 {
     if (amount_sats <= 0) return {};

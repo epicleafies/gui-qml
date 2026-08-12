@@ -87,6 +87,7 @@ private Q_SLOTS:
     void serializeQmlExtensionDoesNotBreakQtWidgetsFormat();
     void deserializeSkipsMalformed();
     void modelRolesMatchEntry();
+    void amountDisplayFollowsUnitButUriStaysBtc();
     void prependInsertsNewRow();
     void removeByRequestIdRemovesRow();
     void entryByIdLookup();
@@ -230,6 +231,25 @@ void ReceiveRequestHistoryModelTests::modelRolesMatchEntry()
     QVERIFY(model.data(idx, ReceiveRequestHistoryModel::UriRole).toString().startsWith("bitcoin:"));
 }
 
+void ReceiveRequestHistoryModelTests::amountDisplayFollowsUnitButUriStaysBtc()
+{
+    ReceiveRequestHistoryModel model;
+    model.setEntries({MakeEntry(1, "1BvBMSEYstWetqTFn5Au4m4GFg7xJaNVN2", 10000, "Alice", "lunch", "")});
+    const QModelIndex idx = model.index(0);
+
+    QCOMPARE(model.data(idx, ReceiveRequestHistoryModel::AmountDisplayRole).toString(),
+             QStringLiteral("0.00010000 ₿"));
+
+    model.setDisplayUnit(3);
+    QCOMPARE(model.data(idx, ReceiveRequestHistoryModel::AmountDisplayRole).toString(),
+             QStringLiteral("10\u2009000 sats"));
+
+    // The BIP21 URI amount is denominated in BTC per the spec and must not
+    // follow the display unit.
+    QCOMPARE(model.data(idx, ReceiveRequestHistoryModel::UriRole).toString(),
+             QStringLiteral("bitcoin:1BvBMSEYstWetqTFn5Au4m4GFg7xJaNVN2?amount=0.00010000&label=Alice&message=lunch"));
+}
+
 void ReceiveRequestHistoryModelTests::prependInsertsNewRow()
 {
     ReceiveRequestHistoryModel model;
@@ -283,7 +303,7 @@ void ReceiveRequestHistoryModelTests::matchingEntriesForAddressReturnsAllMatches
     QCOMPARE(first.value(QStringLiteral("message")).toString(), QStringLiteral("memo"));
     QCOMPARE(first.value(QStringLiteral("noteSelf")).toString(), QStringLiteral("self"));
     QCOMPARE(first.value(QStringLiteral("amountSat")).toLongLong(), qlonglong{3000});
-    QCOMPARE(first.value(QStringLiteral("amountDisplay")).toString(), QStringLiteral("0.00003000"));
+    QCOMPARE(first.value(QStringLiteral("amountDisplay")).toString(), QStringLiteral("0.00003000 ₿"));
     QCOMPARE(first.value(QStringLiteral("address")).toString(), QString::fromStdString(target));
 
     const QVariantMap second{matches.at(1).toMap()};

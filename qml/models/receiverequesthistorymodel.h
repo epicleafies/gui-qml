@@ -47,6 +47,7 @@ public:
     int count() const { return static_cast<int>(m_entries.size()); }
 
     void setEntries(std::vector<QmlRecentRequestEntry>&& entries);
+    void setDisplayUnit(int unit);
     void prependOrReplace(const QmlRecentRequestEntry& entry);
     bool removeByRequestId(const QString& request_id);
     Q_INVOKABLE QVariantList matchingEntriesForAddress(const QString& address) const;
@@ -66,8 +67,10 @@ private:
     int indexOfId(int64_t id) const;
     QVariant dataForEntry(const QmlRecentRequestEntry& entry, int role) const;
     QVariantMap entryMap(const QmlRecentRequestEntry& entry) const;
+    QString formatAmountDisplay(CAmount amount_sats) const;
 
     std::vector<QmlRecentRequestEntry> m_entries;
+    int m_display_unit{0};
 };
 
 #endif // BITCOIN_QML_MODELS_RECEIVEREQUESTHISTORYMODEL_H
