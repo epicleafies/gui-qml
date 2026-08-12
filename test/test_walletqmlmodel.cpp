@@ -707,6 +707,11 @@ void WalletQmlModelTests::scheduleFeeEstimates_populatesFormattedEstimates()
     QCOMPARE(model->estimatedFeeForTarget(2), QStringLiteral("0.00000200 ₿"));
     QCOMPARE(model->estimatedFeeForTarget(6), QStringLiteral("0.00000600 ₿"));
     QCOMPARE(model->estimatedFee(), QStringLiteral("0.00000200 ₿"));
+
+    // The formatted estimates follow the display unit.
+    model->setDisplayUnit(3);
+    QCOMPARE(model->estimatedFeeForTarget(2), QStringLiteral("200 sats"));
+    QCOMPARE(model->estimatedFee(), QStringLiteral("200 sats"));
 }
 
 void WalletQmlModelTests::scheduleFeeEstimates_fallsBackWhenNetworkFeeEstimatesUnavailable()

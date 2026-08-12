@@ -11,9 +11,10 @@
 #include <wallet/coincontrol.h>
 
 namespace {
-QString FormatFee(CAmount amount)
+QString FormatFee(CAmount amount, int display_unit)
 {
     BitcoinAmount bitcoin_amount;
+    bitcoin_amount.setUnit(BitcoinAmount::fromDisplayUnit(display_unit));
     bitcoin_amount.setSatoshi(amount);
     return bitcoin_amount.displayWithUnit();
 }
@@ -27,17 +28,17 @@ BumpTransactionModel::BumpTransactionModel(interfaces::Wallet* wallet, QObject* 
 
 QString BumpTransactionModel::oldFee() const
 {
-    return FormatFee(m_old_fee);
+    return FormatFee(m_old_fee, m_display_unit);
 }
 
 QString BumpTransactionModel::newFee() const
 {
-    return FormatFee(m_new_fee);
+    return FormatFee(m_new_fee, m_display_unit);
 }
 
 QString BumpTransactionModel::feeIncrease() const
 {
-    return FormatFee(m_new_fee - m_old_fee);
+    return FormatFee(m_new_fee - m_old_fee, m_display_unit);
 }
 
 QString BumpTransactionModel::oldTxid() const
@@ -82,6 +83,15 @@ void BumpTransactionModel::setUnlockRequired(const QString& error)
     m_error = error;
     setNeedsUnlock(true);
     Q_EMIT resultChanged();
+}
+
+void BumpTransactionModel::setDisplayUnit(int unit)
+{
+    if (m_display_unit != unit) {
+        m_display_unit = unit;
+        // The formatted fee strings depend on the unit.
+        Q_EMIT resultChanged();
+    }
 }
 
 void BumpTransactionModel::setSecurityStateChangedFn(std::function<void()> fn)

@@ -60,6 +60,7 @@ public:
     Q_INVOKABLE bool confirmFeeBump();
     Q_INVOKABLE bool confirmFeeBumpWithPassphrase(const QString& passphrase);
     Q_INVOKABLE void reset();
+    void setDisplayUnit(int unit);
     void setSecurityStateChangedFn(std::function<void()> fn);
 
 Q_SIGNALS:
@@ -83,6 +84,7 @@ private:
     ActionType m_action_type{SpeedUp};
     CAmount m_old_fee{0};
     CAmount m_new_fee{0};
+    int m_display_unit{0};
     CMutableTransaction m_bump_mtx;
     Txid m_original_txid;
     QString m_new_txid;

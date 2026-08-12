@@ -75,6 +75,15 @@ private Q_SLOTS:
         QVERIFY(!model.oldFee().isEmpty());
         QVERIFY(!model.newFee().isEmpty());
         QVERIFY(!model.feeIncrease().isEmpty());
+
+        // The formatted fees follow the display unit.
+        QCOMPARE(model.newFee(), QStringLiteral("0.00001000 ₿"));
+        QSignalSpy resultSpy(&model, &BumpTransactionModel::resultChanged);
+        model.setDisplayUnit(3);
+        QCOMPARE(model.oldFee(), QStringLiteral("500 sats"));
+        QCOMPARE(model.newFee(), QStringLiteral("1000 sats"));
+        QCOMPARE(model.feeIncrease(), QStringLiteral("500 sats"));
+        QCOMPARE(resultSpy.count(), 1);
     }
 
     void prepareFeeBump_failureSetsErrorState()

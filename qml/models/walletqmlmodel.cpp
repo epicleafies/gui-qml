@@ -80,9 +80,10 @@ int FallbackFeeMultiplier(const unsigned int target)
     return 1;
 }
 
-QString FormatFeeEstimate(CAmount amount)
+QString FormatFeeEstimate(CAmount amount, int display_unit)
 {
     BitcoinAmount bitcoin_amount;
+    bitcoin_amount.setUnit(BitcoinAmount::fromDisplayUnit(display_unit));
     bitcoin_amount.setSatoshi(amount);
     return bitcoin_amount.displayWithUnit();
 }
@@ -536,7 +537,7 @@ QString WalletQmlModel::estimatedFee() const
 {
     if (m_custom_fee_enabled) {
         return customFeeRateValid() && m_custom_fee_estimate.has_value()
-            ? FormatFeeEstimate(*m_custom_fee_estimate)
+            ? FormatFeeEstimate(*m_custom_fee_estimate, m_display_unit)
             : QString{};
     }
     return estimatedFeeForTarget(feeTargetBlocks());
@@ -599,7 +600,7 @@ QString WalletQmlModel::estimatedFeeForTarget(const unsigned int target_blocks) 
 {
     const auto estimate = m_fee_estimates.constFind(target_blocks);
     if (estimate != m_fee_estimates.constEnd()) {
-        return FormatFeeEstimate(estimate.value());
+        return FormatFeeEstimate(estimate.value(), m_display_unit);
     }
 
     return {};
@@ -2258,7 +2259,15 @@ void WalletQmlModel::setDisplayUnit(int unit)
         if (m_current_transaction) {
             m_current_transaction->setDisplayUnit(unit);
         }
+        if (m_bump_transaction_model) {
+            m_bump_transaction_model->setDisplayUnit(unit);
+        }
         Q_EMIT balanceChanged();
+        // The formatted fee estimates depend on the unit; bump the revision
+        // so the fee picker bindings re-evaluate their estimate strings.
+        Q_EMIT estimatedFeeChanged();
+        ++m_fee_estimate_revision;
+        Q_EMIT feeEstimateRevisionChanged();
         Q_EMIT displayUnitChanged(unit);
     }
 }
