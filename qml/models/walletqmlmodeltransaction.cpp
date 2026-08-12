@@ -74,6 +74,10 @@ void WalletQmlModelTransaction::setDisplayUnit(int unit)
 {
     if (unit != m_display_unit) {
         m_display_unit = unit;
+        const BitcoinAmount::Unit amount_unit = BitcoinAmount::fromDisplayUnit(unit);
+        m_amount_amount->setUnit(amount_unit);
+        m_fee_amount->setUnit(amount_unit);
+        m_total_amount->setUnit(amount_unit);
         Q_EMIT amountChanged();
         Q_EMIT feeChanged();
         Q_EMIT totalChanged();

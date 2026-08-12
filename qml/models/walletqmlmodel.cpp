@@ -2064,6 +2064,7 @@ bool WalletQmlModel::tryImportPsbtToReview(const PartiallySignedTransaction& psb
     if (analysis.fee) {
         m_current_transaction->setTransactionFee(*analysis.fee);
     }
+    m_current_transaction->setDisplayUnit(m_display_unit);
     m_current_psbt = std::make_unique<PartiallySignedTransaction>(psbt);
     m_current_transaction_source = CurrentTransactionSource::ImportedPsbt;
     m_current_transaction_can_send = can_send;

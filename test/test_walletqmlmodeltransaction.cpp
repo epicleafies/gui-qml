@@ -18,6 +18,7 @@ class WalletQmlModelTransactionTests : public QObject
 private Q_SLOTS:
     void singleRecipientReviewAmountsInheritRecipientUnit();
     void multipleRecipientReviewAmountsStayInBtc();
+    void setDisplayUnitRetargetsReviewAmounts();
     void recipientRolesExposeFormattedAddressAndUnitLabel();
     void removingRecipientUpdatesTotalOnce();
 };
@@ -57,6 +58,28 @@ void WalletQmlModelTransactionTests::multipleRecipientReviewAmountsStayInBtc()
     QCOMPARE(transaction.totalAmount()->unit(), BitcoinAmount::Unit::BTC);
     QCOMPARE(transaction.feeAmount()->toDisplay(), QString("0.00001000"));
     QCOMPARE(transaction.totalAmount()->toDisplay(), QString("0.50003000"));
+}
+
+void WalletQmlModelTransactionTests::setDisplayUnitRetargetsReviewAmounts()
+{
+    SendRecipientsListModel recipients;
+    recipients.currentRecipient()->amount()->setSatoshi(COIN / 2);
+    recipients.add();
+    recipients.currentRecipient()->amount()->setSatoshi(2000);
+
+    WalletQmlModelTransaction transaction(&recipients);
+    transaction.setTransactionFee(1000);
+
+    // The multi-recipient constructor fallback is BTC; applying the display
+    // unit must retarget the review amounts, not only the formatted strings.
+    transaction.setDisplayUnit(2); // uBTC (bits)
+
+    QCOMPARE(transaction.amountAmount()->unit(), BitcoinAmount::Unit::uBTC);
+    QCOMPARE(transaction.feeAmount()->unit(), BitcoinAmount::Unit::uBTC);
+    QCOMPARE(transaction.totalAmount()->unit(), BitcoinAmount::Unit::uBTC);
+    QCOMPARE(transaction.amountAmount()->toDisplay(), QString("500020.00"));
+    QCOMPARE(transaction.feeAmount()->toDisplay(), QString("10.00"));
+    QCOMPARE(transaction.totalAmount()->toDisplay(), QString("500030.00"));
 }
 
 void WalletQmlModelTransactionTests::recipientRolesExposeFormattedAddressAndUnitLabel()
