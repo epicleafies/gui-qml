@@ -71,6 +71,10 @@ private:
     void unsubscribeFromCoreSignals();
     void updateTransaction(const uint256& hash, const interfaces::WalletTxStatus& wtx,
                            int num_blocks, int64_t block_time);
+    static bool transactionSortsBefore(const QSharedPointer<Transaction>& a,
+                                       const QSharedPointer<Transaction>& b);
+    int sortedInsertPosition(const QSharedPointer<Transaction>& tx) const;
+    void repositionTransaction(int index);
     int findTransactionIndex(const uint256& hash) const;
     int findPendingRequestIndex(const QString& address) const;
     void fulfillPendingRequest(int index, const QSharedPointer<Transaction>& real_tx);
