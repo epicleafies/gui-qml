@@ -2784,7 +2784,8 @@ public:
         IsPendingRequestRole,
         RequestIdRole,
         TimestampRole,
-        NetAmountSatRole
+        NetAmountSatRole,
+        CountsForBalanceRole
     };
 
     int rowCount(const QModelIndex& parent = QModelIndex{}) const override
@@ -2815,6 +2816,7 @@ public:
             case RequestIdRole: return QString{};
             case TimestampRole: return 1767225600;
             case NetAmountSatRole: return 1000000;
+            case CountsForBalanceRole: return true;
             default: return {};
             }
         }
@@ -2834,6 +2836,7 @@ public:
         case RequestIdRole: return QString{};
         case TimestampRole: return 1767312000;
         case NetAmountSatRole: return -100000;
+        case CountsForBalanceRole: return false;
         default: return {};
         }
     }
@@ -2856,6 +2859,7 @@ public:
             {RequestIdRole, "requestId"},
             {TimestampRole, "timestamp"},
             {NetAmountSatRole, "netAmountSat"},
+            {CountsForBalanceRole, "countsForBalance"},
         };
     }
 

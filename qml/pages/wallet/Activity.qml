@@ -441,6 +441,7 @@ PageStack {
                         required property string replacedByTxid
                         required property bool isPendingRequest
                         required property string requestId
+                        required property bool countsForBalance
 
                         HoverHandler {
                             cursorShape: Qt.PointingHandCursor
@@ -472,10 +473,12 @@ PageStack {
                             transactionType: delegate.type
                             transactionStatus: delegate.status
                             isPendingRequest: delegate.isPendingRequest
+                            countsForBalance: delegate.countsForBalance
                         }
 
                         contentItem: RowLayout {
                             Icon {
+                                objectName: delegate.txid !== "" ? "activityItemIcon_" + delegate.txid : "activityItemIcon_pending_" + delegate.index
                                 Layout.alignment: Qt.AlignCenter
                                 Layout.margins: 6
                                 source: transactionVisuals.iconSource
@@ -497,16 +500,19 @@ PageStack {
                             }
 
                             CoreText {
+                                objectName: delegate.txid !== "" ? "activityItemDate_" + delegate.txid : "activityItemDate_pending_" + delegate.index
                                 Layout.alignment: Qt.AlignCenter
                                 Layout.preferredWidth: 110
                                 Layout.margins: 6
                                 wrap: false
-                                text: delegate.date
+                                //: Shown in place of the date for a transaction that has no confirmations yet
+                                text: transactionVisuals.zeroConf ? qsTr("Pending") : delegate.date
                                 font.pixelSize: 15
                                 horizontalAlignment: Text.AlignRight
                             }
 
                             CoreText {
+                                objectName: delegate.txid !== "" ? "activityItemAmount_" + delegate.txid : "activityItemAmount_pending_" + delegate.index
                                 Layout.alignment: Qt.AlignCenter
                                 Layout.preferredWidth: 140
                                 Layout.margins: 6
@@ -528,6 +534,7 @@ PageStack {
                                     depth: delegate.depth
                                     type: delegate.type
                                     status: delegate.status
+                                    countsForBalance: delegate.countsForBalance
                                     address: delegate.address
                                     label: delegate.label
                                     paymentRequests: walletController.selectedWallet
