@@ -48,6 +48,8 @@ public:
 
     Q_INVOKABLE void reload();
     Q_INVOKABLE QVariantMap transactionDetails(const QString& txid) const;
+    void refreshStatuses();
+    void refreshLabels();
     int rowCount(const QModelIndex &parent = QModelIndex()) const override;
     int count() const { return rowCount(); }
     QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
