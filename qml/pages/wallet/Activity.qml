@@ -142,9 +142,10 @@ PageStack {
             }
 
             // Placeholder and input mask for the minimum amount field, per
-            // display unit. The integer digits keep any accepted value below
-            // MAX_MONEY (2.1e15 sat) and within the JS exact integer range for
-            // the display round trip.
+            // display unit. The digit counts keep any accepted value well
+            // inside the qint64 satoshi range of the C++ parse; BTC input can
+            // nominally exceed MAX_MONEY, which is harmless for a filter
+            // threshold (an impossible minimum simply matches nothing).
             //
             // The unit is a BitcoinAmount.Unit value, compared by number rather
             // than by name: QML only exposes enum values whose name begins with
