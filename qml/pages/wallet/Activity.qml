@@ -832,6 +832,7 @@ PageStack {
 
                     // Return to the preset list.
                     ItemDelegate {
+                        id: presetsBackButton
                         objectName: "activityDatePresetsBack"
                         Layout.fillWidth: true
                         implicitHeight: 30
@@ -839,6 +840,21 @@ PageStack {
                         //: Accessibility label for the control that leaves the custom date range calendar and returns to the date presets.
                         Accessible.name: qsTr("Back to date presets")
                         Accessible.role: Accessible.Button
+                        HoverHandler {
+                            enabled: AppMode.isDesktop
+                            cursorShape: Qt.PointingHandCursor
+                        }
+                        // Replace the Basic-style default background, which
+                        // presses in the light system palette over the themed
+                        // popup.
+                        background: Rectangle {
+                            radius: 4
+                            color: presetsBackButton.down
+                                ? Theme.color.neutral4
+                                : presetsBackButton.hovered
+                                    ? Theme.color.neutral2
+                                    : "transparent"
+                        }
                         contentItem: RowLayout {
                             spacing: 4
                             Icon {

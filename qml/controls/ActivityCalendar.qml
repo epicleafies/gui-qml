@@ -534,6 +534,20 @@ ColumnLayout {
         padding: 0
         Accessible.role: Accessible.Button
         Accessible.name: navButton.accessibleName
+        HoverHandler {
+            enabled: AppMode.isDesktop
+            cursorShape: Qt.PointingHandCursor
+        }
+        // Replace the Basic-style default background, which presses in the
+        // light system palette over the themed popup.
+        background: Rectangle {
+            radius: 4
+            color: navButton.down
+                ? Theme.color.neutral4
+                : navButton.hovered
+                    ? Theme.color.neutral2
+                    : "transparent"
+        }
         contentItem: Item {
             // Two plain Icons rather than a Repeater over a 1-or-2 model: a
             // delegate inside an inline component is not wrapped in an implicit
