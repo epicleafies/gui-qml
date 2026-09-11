@@ -407,10 +407,13 @@ void ActivityListModel::subscribeToCoreSignals()
     // Connect signals to wallet. The callback fires on the wallet's
     // notification thread.
     m_handler_transaction_changed = m_wallet_model->handleTransactionChanged([this](const uint256& hash, ChangeType status) {
-        // Read the status here, on the wallet's notification thread: it already
-        // holds cs_wallet, so the try-lock inside tryGetTxStatus is guaranteed
-        // to succeed. Deferred to the GUI thread it can lose the try-lock while
-        // the wallet is still processing the block and silently drop the update.
+        // Read the status here, on the wallet's notification thread: the
+        // firing paths hold cs_wallet, so the try-lock inside tryGetTxStatus
+        // succeeds. The snapshot must stay in this notification context: if
+        // the callback is ever delivered on another thread (for example by
+        // marshalling the notification itself before it reaches this handler),
+        // the try-lock can fail while the wallet is still processing the block
+        // and the update is silently dropped.
         interfaces::WalletTxStatus wtx;
         int num_blocks;
         int64_t block_time;
