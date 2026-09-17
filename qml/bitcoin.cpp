@@ -62,6 +62,7 @@
 #include <qml/models/walletqmlmodeltransaction.h>
 #include <qml/qrimageprovider.h>
 #include <qml/networkstyle.h>
+#include <qml/systemfiledialog.h>
 #include <qml/util.h>
 #include <qml/walletqmlcontroller.h>
 #ifdef ENABLE_TEST_AUTOMATION
@@ -157,7 +158,7 @@ AppMode SetupAppMode()
     return AppMode(mode, WalletEnabledFromArgs());
 }
 
-void RegisterQmlTypes(AppMode& app_mode, BuildInfo& build_info, Clipboard& clipboard, BitcoinUriModel& bitcoin_uri_model);
+void RegisterQmlTypes(AppMode& app_mode, BuildInfo& build_info, Clipboard& clipboard, BitcoinUriModel& bitcoin_uri_model, SystemFileDialog& system_file_dialog);
 
 bool InitErrorMessageBox(
     const bilingual_str& message,
@@ -168,7 +169,8 @@ bool InitErrorMessageBox(
     static BuildInfo error_build_info;
     static Clipboard error_clipboard;
     static BitcoinUriModel error_bitcoin_uri_model;
-    RegisterQmlTypes(error_app_mode, error_build_info, error_clipboard, error_bitcoin_uri_model);
+    static SystemFileDialog error_system_file_dialog;
+    RegisterQmlTypes(error_app_mode, error_build_info, error_clipboard, error_bitcoin_uri_model, error_system_file_dialog);
 
     QQmlApplicationEngine engine;
 
@@ -235,18 +237,20 @@ void ApplyTestSettingsDir()
 }
 #endif
 
-void RegisterQmlTypes(AppMode& app_mode, BuildInfo& build_info, Clipboard& clipboard, BitcoinUriModel& bitcoin_uri_model)
+void RegisterQmlTypes(AppMode& app_mode, BuildInfo& build_info, Clipboard& clipboard, BitcoinUriModel& bitcoin_uri_model, SystemFileDialog& system_file_dialog)
 {
     static bool registered{false};
     static AppMode* app_mode_instance{nullptr};
     static BuildInfo* build_info_instance{nullptr};
     static Clipboard* clipboard_instance{nullptr};
     static BitcoinUriModel* bitcoin_uri_model_instance{nullptr};
+    static SystemFileDialog* system_file_dialog_instance{nullptr};
     if (registered) return;
     app_mode_instance = &app_mode;
     build_info_instance = &build_info;
     clipboard_instance = &clipboard;
     bitcoin_uri_model_instance = &bitcoin_uri_model;
+    system_file_dialog_instance = &system_file_dialog;
 
     qmlRegisterSingletonType<AppMode>("org.bitcoincore.qt", 1, 0, "AppMode", [](QQmlEngine*, QJSEngine*) -> QObject* {
         QQmlEngine::setObjectOwnership(app_mode_instance, QQmlEngine::CppOwnership);
@@ -263,6 +267,10 @@ void RegisterQmlTypes(AppMode& app_mode, BuildInfo& build_info, Clipboard& clipb
     qmlRegisterSingletonType<BitcoinUriModel>("org.bitcoincore.qt", 1, 0, "BitcoinUri", [](QQmlEngine*, QJSEngine*) -> QObject* {
         QQmlEngine::setObjectOwnership(bitcoin_uri_model_instance, QQmlEngine::CppOwnership);
         return bitcoin_uri_model_instance;
+    });
+    qmlRegisterSingletonType<SystemFileDialog>("org.bitcoincore.qt", 1, 0, "SystemFileDialog", [](QQmlEngine*, QJSEngine*) -> QObject* {
+        QQmlEngine::setObjectOwnership(system_file_dialog_instance, QQmlEngine::CppOwnership);
+        return system_file_dialog_instance;
     });
     qmlRegisterType<BlockClockDial>("org.bitcoincore.qt", 1, 0, "BlockClockDial");
     qmlRegisterType<LineGraph>("org.bitcoincore.qt", 1, 0, "LineGraph");
@@ -489,7 +497,8 @@ int QmlGuiMain(int argc, char* argv[])
     BuildInfo build_info;
     Clipboard clipboard;
     BitcoinUriModel bitcoin_uri_model;
-    RegisterQmlTypes(app_mode, build_info, clipboard, bitcoin_uri_model);
+    SystemFileDialog system_file_dialog;
+    RegisterQmlTypes(app_mode, build_info, clipboard, bitcoin_uri_model, system_file_dialog);
 
     const QString cli_lang = QString::fromStdString(gArgs.GetArg("-lang", ""));
     const QString startup_language = cli_lang.isEmpty()

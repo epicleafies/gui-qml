@@ -5,7 +5,6 @@
 import QtQuick 2.15
 import QtQuick.Controls 2.15
 import QtQuick.Layouts 1.15
-import QtQuick.Dialogs
 import org.bitcoincore.qt 1.0
 
 import "../../controls"
@@ -38,7 +37,7 @@ Page {
         }
     }
 
-    FileDialog {
+    AppFileDialog {
         id: fileDialog
         nameFilters: [qsTr("Wallet backup files (*.bak *.dat)"), qsTr("All files (*)")]
         onAccepted: {

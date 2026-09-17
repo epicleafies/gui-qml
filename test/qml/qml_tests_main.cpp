@@ -80,6 +80,89 @@ public:
     QString fullClientVersion() const { return QStringLiteral("v0.0.0-test"); }
 };
 
+class MockSystemFileDialog : public QObject
+{
+    Q_OBJECT
+    Q_PROPERTY(QUrl nextSelectedFile READ nextSelectedFile WRITE setNextSelectedFile NOTIFY stateChanged)
+    Q_PROPERTY(QString lastMode READ lastMode NOTIFY stateChanged)
+    Q_PROPERTY(QString lastTitle READ lastTitle NOTIFY stateChanged)
+    Q_PROPERTY(QUrl lastFolder READ lastFolder NOTIFY stateChanged)
+    Q_PROPERTY(QUrl lastFile READ lastFile NOTIFY stateChanged)
+    Q_PROPERTY(QStringList lastNameFilters READ lastNameFilters NOTIFY stateChanged)
+    Q_PROPERTY(QString lastDefaultSuffix READ lastDefaultSuffix NOTIFY stateChanged)
+
+public:
+    QUrl nextSelectedFile() const { return m_next_selected_file; }
+    void setNextSelectedFile(const QUrl& url)
+    {
+        m_next_selected_file = url;
+        Q_EMIT stateChanged();
+    }
+    QString lastMode() const { return m_last_mode; }
+    QString lastTitle() const { return m_last_title; }
+    QUrl lastFolder() const { return m_last_folder; }
+    QUrl lastFile() const { return m_last_file; }
+    QStringList lastNameFilters() const { return m_last_name_filters; }
+    QString lastDefaultSuffix() const { return m_last_default_suffix; }
+
+    Q_INVOKABLE bool openSaveDialog(const QString& title, const QUrl& current_folder,
+                                    const QUrl& current_file, const QStringList& name_filters,
+                                    const QString& default_suffix)
+    {
+        m_last_mode = QStringLiteral("save");
+        m_last_title = title;
+        m_last_folder = current_folder;
+        m_last_file = current_file;
+        m_last_name_filters = name_filters;
+        m_last_default_suffix = default_suffix;
+        Q_EMIT stateChanged();
+        finish();
+        return true;
+    }
+
+    Q_INVOKABLE bool openLoadDialog(const QString& title, const QUrl& current_folder,
+                                    const QStringList& name_filters)
+    {
+        m_last_mode = QStringLiteral("load");
+        m_last_title = title;
+        m_last_folder = current_folder;
+        m_last_file = QUrl();
+        m_last_name_filters = name_filters;
+        m_last_default_suffix.clear();
+        Q_EMIT stateChanged();
+        finish();
+        return true;
+    }
+
+Q_SIGNALS:
+    void fileSelected(const QUrl& file);
+    void dismissed();
+    void stateChanged();
+
+private:
+    // The real bridge reports the choice asynchronously once the dialog
+    // closes; queue the mock's answer so consumers see the same shape.
+    void finish()
+    {
+        const QUrl next = m_next_selected_file;
+        QMetaObject::invokeMethod(this, [this, next] {
+            if (next.isEmpty()) {
+                Q_EMIT dismissed();
+            } else {
+                Q_EMIT fileSelected(next);
+            }
+        }, Qt::QueuedConnection);
+    }
+
+    QUrl m_next_selected_file;
+    QString m_last_mode;
+    QString m_last_title;
+    QUrl m_last_folder;
+    QUrl m_last_file;
+    QStringList m_last_name_filters;
+    QString m_last_default_suffix;
+};
+
 class MockPeerDetailsModel : public QObject
 {
     Q_OBJECT
@@ -3767,6 +3850,7 @@ public Q_SLOTS:
         engine->addImportPath(QStringLiteral(BITCOINQML_QML_TEST_MOCKS_DIR));
         static MockAppMode app_mode;
         static MockBuildInfo build_info;
+        static MockSystemFileDialog system_file_dialog;
         static MockOptionsModel options_model;
         static MockChainModel chain_model;
         static MockNodeModel node_model;
@@ -3804,6 +3888,7 @@ public Q_SLOTS:
         wallet_controller.setSelectedWalletObject(&wallet_model);
         qmlRegisterSingletonInstance<MockAppMode>("org.bitcoincore.qt", 1, 0, "AppMode", &app_mode);
         qmlRegisterSingletonInstance<MockBuildInfo>("org.bitcoincore.qt", 1, 0, "BuildInfo", &build_info);
+        qmlRegisterSingletonInstance<MockSystemFileDialog>("org.bitcoincore.qt", 1, 0, "SystemFileDialog", &system_file_dialog);
         qmlRegisterUncreatableType<MockPeerDetailsModel>(
             "org.bitcoincore.qt",
             1,
