@@ -4,7 +4,6 @@
 
 import QtQuick 2.15
 import QtQuick.Controls 2.15
-import QtQuick.Dialogs
 import QtQuick.Layouts 1.15
 import org.bitcoincore.qt 1.0
 
@@ -298,10 +297,10 @@ PageStack {
                 property alias searchFiltersVisible: root.filtersVisible
             }
 
-            FileDialog {
+            AppFileDialog {
                 id: exportDialog
                 defaultSuffix: "csv"
-                fileMode: FileDialog.SaveFile
+                fileMode: AppFileDialog.SaveFile
                 nameFilters: [qsTr("Comma separated file (*.csv)")]
                 onAccepted: root.exportActivity(exportDialog.selectedFile.toString())
             }

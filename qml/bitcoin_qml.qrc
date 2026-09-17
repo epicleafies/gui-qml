@@ -5,6 +5,7 @@
         <file>components/AddressLabel.qml</file>
         <file>components/AlertAction.qml</file>
         <file>components/AlertPopup.qml</file>
+        <file>components/AppFileDialog.qml</file>
         <file>components/BitcoinAddressDisplayField.qml</file>
         <file>components/BitcoinAddressInputField.qml</file>
         <file>components/BitcoinAmountDisplayField.qml</file>
