@@ -1,0 +1,1 @@
+v0 smoke test 2026-10-03: see agent-memory/projects/host/v0-smoke.md
