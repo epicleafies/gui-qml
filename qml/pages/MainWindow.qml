@@ -1,4 +1,4 @@
-// Copyright (c) 2021 The Bitcoin Core developers
+// Copyright (c) 2021-2026 The Bitcoin Core developers
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -194,8 +194,7 @@ ApplicationWindow {
         onRedoRequested: appWindow.invokeEditCommand("redo")
         onCopyRequested: appWindow.invokeEditCommand("copy")
         onPasteRequested: appWindow.invokeEditCommand("paste")
-        onToggleDisplayUnitRequested: optionsModel.displayUnit = optionsModel.displayUnit === BitcoinAmount.SAT
-            ? BitcoinAmount.BTC : BitcoinAmount.SAT
+        onToggleDisplayUnitRequested: optionsModel.toggleDisplayUnit()
         onMinimizeRequested: appWindow.showMinimized()
         onZoomRequested: {
             if (appWindow.visibility === Window.Maximized) {

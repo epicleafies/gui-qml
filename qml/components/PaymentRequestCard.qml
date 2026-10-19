@@ -146,7 +146,7 @@ Pane {
         // Preserve a typed draft. An untouched saved amount simply follows
         // the app's display unit without becoming an edit to the request.
         if (!saved) amountInput.modified = true
-        optionsModel.displayUnit = amountUnit === BitcoinAmount.SAT ? BitcoinAmount.BTC : BitcoinAmount.SAT
+        optionsModel.toggleDisplayUnit()
         if (!saved) saveField("amount", amountInput)
     }
     function createRequest() {

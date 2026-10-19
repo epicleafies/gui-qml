@@ -140,7 +140,7 @@ SettingsPage {
                     }
                 ]
                 onActivated: function(value) {
-                    optionsModel.displayUnit = value
+                    optionsModel.defaultDisplayUnit = value
                 }
             }
         }

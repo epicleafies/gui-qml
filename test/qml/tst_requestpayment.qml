@@ -23,6 +23,7 @@ TestCase {
     }
 
     function init() {
+        optionsModel.defaultDisplayUnit = BitcoinAmount.BTC
         optionsModel.displayUnit = BitcoinAmount.BTC
         testPaymentRequest.clear()
         testWalletModel.lastCommitAddressType = ""
@@ -525,6 +526,27 @@ TestCase {
         tryCompare(icon, "height", 12)
         card.toggleAmountUnit()
         compare(optionsModel.displayUnit, BitcoinAmount.BTC)
+        compare(card.request.amount.satoshi, amount)
+        verify(!button.enabled)
+    }
+
+    function test_saved_request_unit_toggle_cycles_through_default_unit() {
+        const page = createPage()
+        editField(page.draftCard, "requestPaymentAmountInput", "0.001")
+        const card = createRequest(page)
+        const amount = card.request.amount.satoshi
+        const button = findChild(card, "requestPaymentUpdateButton")
+        const toggle = findChild(card, "requestPaymentAmountUnitToggle")
+        optionsModel.defaultDisplayUnit = BitcoinAmount.MilliBTC
+        compare(toggle.text, "mBTC")
+        compare(findChild(card, "requestPaymentAmountInput").text, "1.00000")
+        card.toggleAmountUnit()
+        compare(optionsModel.displayUnit, BitcoinAmount.SAT)
+        card.toggleAmountUnit()
+        compare(optionsModel.displayUnit, BitcoinAmount.BTC)
+        card.toggleAmountUnit()
+        compare(optionsModel.displayUnit, BitcoinAmount.MilliBTC)
+        compare(toggle.text, "mBTC")
         compare(card.request.amount.satoshi, amount)
         verify(!button.enabled)
     }

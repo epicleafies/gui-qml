@@ -63,6 +63,7 @@ TestCase {
         }]
         testWalletTransaction.reviewTargetBlocks = 6
         testWalletTransaction.reviewFeeRate = "2.5"
+        optionsModel.defaultDisplayUnit = BitcoinAmount.BTC
         optionsModel.displayUnit = BitcoinAmount.BTC
         testCoinsListModel.reset()
         Clipboard.currentText = ""
@@ -468,6 +469,28 @@ TestCase {
         tryVerify(function() { return testWalletModel.scheduleFeeEstimatesCalls > callsBefore })
         compare(amountInput.text, "1")
         compare(testSendRecipient.amount.display, "1.00000000")
+    }
+
+    function test_send_amount_unit_toggle_cycles_through_default_unit() {
+        const page = createTemporaryObject(sendComponent, this)
+        verify(page !== null)
+
+        const toggle = findChild(page, "sendAmountUnitToggle")
+        verify(toggle !== null)
+        optionsModel.defaultDisplayUnit = BitcoinAmount.MicroBTC
+        tryCompare(testSendRecipient.amount, "unit", BitcoinAmount.MicroBTC)
+        compare(toggle.text, "bits")
+
+        toggle.clicked()
+        compare(optionsModel.displayUnit, BitcoinAmount.SAT)
+        tryCompare(testSendRecipient.amount, "unit", BitcoinAmount.SAT)
+        toggle.clicked()
+        compare(optionsModel.displayUnit, BitcoinAmount.BTC)
+        tryCompare(testSendRecipient.amount, "unit", BitcoinAmount.BTC)
+        toggle.clicked()
+        compare(optionsModel.displayUnit, BitcoinAmount.MicroBTC)
+        tryCompare(testSendRecipient.amount, "unit", BitcoinAmount.MicroBTC)
+        compare(optionsModel.defaultDisplayUnit, BitcoinAmount.MicroBTC)
     }
 
     function test_send_amount_allows_editing_whole_part_before_decimal() {

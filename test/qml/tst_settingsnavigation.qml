@@ -119,6 +119,7 @@ TestCase {
         nodeModel.mempoolInformationAvailable = true
         Theme.dark = true
         Theme.blockclocksize = 5 / 12
+        optionsModel.defaultDisplayUnit = 0
         optionsModel.displayUnit = 0
         optionsModel.moneyFontChoice = "embedded"
         optionsModel.maxMempoolSizeMB = 300
@@ -695,6 +696,15 @@ TestCase {
             "2 decimal places (0.01 bits = 1 sat)")
         compare(displayUnitPicker.itemAtIndex(3).subtitle,
             "Satoshi, the smallest unit (1 sat = 0.00000001 BTC)")
+
+        // Picking a unit makes it the default and switches the app to it.
+        optionsModel.displayUnit = 3
+        displayUnitPicker.activated(1)
+        compare(optionsModel.defaultDisplayUnit, 1)
+        compare(optionsModel.displayUnit, 1)
+        displayUnitPicker.activated(0)
+        compare(optionsModel.defaultDisplayUnit, 0)
+        compare(optionsModel.displayUnit, 0)
 
         themePicker.selected(0, "Light")
         compare(Theme.dark, false)
