@@ -77,6 +77,12 @@ def test_display_unit_selection(gui):
         select_display_unit(gui, "displayUnitSAT", "sat")
         assert gui.get_property("displayUnitPicker", "currentValue") == 3
         print("  Display unit changed from BTC to sat  PASSED")
+        select_display_unit(gui, "displayUnitMBTC", "mBTC")
+        assert gui.get_property("displayUnitPicker", "currentValue") == 1
+        print("  Display unit changed from sat to mBTC  PASSED")
+        select_display_unit(gui, "displayUnitBits", "bits")
+        assert gui.get_property("displayUnitPicker", "currentValue") == 2
+        print("  Display unit changed from mBTC to bits  PASSED")
     finally:
         try:
             reset_display_unit_to_btc(gui)
