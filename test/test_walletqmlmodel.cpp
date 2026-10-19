@@ -660,6 +660,13 @@ private Q_SLOTS:
     void cleanupTestCase();
     void feeTargetIndex_mapsStandardTargets();
     void customFeeRateUpdatesEstimatedTarget();
+    void setDisplayUnitReachesBumpModel() {
+        auto [wallet, model] = MakeWalletModel();
+        QSignalSpy result_spy(model->bumpModel(), &BumpTransactionModel::resultChanged);
+        model->setDisplayUnit(3);
+        QCOMPARE(result_spy.count(), 1);
+        QCOMPARE(model->bumpModel()->oldFee(), QStringLiteral("0 sats"));
+    }
     void maximumKeepsAmountWhenValidAddressCannotBeEstimated() {
         auto [wallet, model] = MakeWalletModel();
         SetValidRecipient(*model);

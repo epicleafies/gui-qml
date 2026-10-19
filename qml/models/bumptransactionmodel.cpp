@@ -5,17 +5,17 @@
 #include <qml/models/bumptransactionmodel.h>
 
 #include <interfaces/wallet.h>
-#include <qml/bitcoinamount.h>
+#include <qml/bitcoinunits.h>
 #include <qml/models/walletunlock.h>
 #include <qml/util.h>
 #include <wallet/coincontrol.h>
 
 namespace {
-QString FormatFee(CAmount amount)
+QString FormatFee(CAmount amount, int display_unit)
 {
-    BitcoinAmount bitcoin_amount;
-    bitcoin_amount.setSatoshi(amount);
-    return bitcoin_amount.displayWithUnit();
+    const QmlBitcoinUnits::Unit unit = QmlBitcoinUnits::fromDisplayUnit(display_unit);
+    return QmlBitcoinUnits::formatForDisplay(unit, amount) + QLatin1Char(' ')
+        + QmlBitcoinUnits::label(unit, amount);
 }
 } // namespace
 
@@ -27,17 +27,25 @@ BumpTransactionModel::BumpTransactionModel(interfaces::Wallet* wallet, QObject* 
 
 QString BumpTransactionModel::oldFee() const
 {
-    return FormatFee(m_old_fee);
+    return FormatFee(m_old_fee, m_display_unit);
 }
 
 QString BumpTransactionModel::newFee() const
 {
-    return FormatFee(m_new_fee);
+    return FormatFee(m_new_fee, m_display_unit);
 }
 
 QString BumpTransactionModel::feeIncrease() const
 {
-    return FormatFee(m_new_fee - m_old_fee);
+    return FormatFee(m_new_fee - m_old_fee, m_display_unit);
+}
+
+void BumpTransactionModel::setDisplayUnit(int unit)
+{
+    if (m_display_unit == unit) return;
+    m_display_unit = unit;
+    // The formatted fee strings depend on the unit.
+    Q_EMIT resultChanged();
 }
 
 QString BumpTransactionModel::oldTxid() const

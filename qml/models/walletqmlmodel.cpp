@@ -3145,6 +3145,9 @@ void WalletQmlModel::setDisplayUnit(int unit)
         if (m_address_list_model) {
             m_address_list_model->setDisplayUnit(unit);
         }
+        if (m_bump_transaction_model) {
+            m_bump_transaction_model->setDisplayUnit(unit);
+        }
         if (m_current_transaction) {
             m_current_transaction->setDisplayUnit(unit);
             Q_EMIT currentTransactionChanged();
