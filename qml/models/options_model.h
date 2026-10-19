@@ -1,4 +1,4 @@
-// Copyright (c) 2022 The Bitcoin Core developers
+// Copyright (c) 2022-2026 The Bitcoin Core developers
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -71,6 +71,7 @@ class OptionsQmlModel : public QObject
     Q_PROPERTY(QString languageSummary READ languageSummary NOTIFY languageChanged)
     Q_PROPERTY(QStringList availableLanguages READ availableLanguages CONSTANT)
     Q_PROPERTY(int displayUnit READ displayUnit WRITE setDisplayUnit NOTIFY displayUnitChanged)
+    Q_PROPERTY(int defaultDisplayUnit READ defaultDisplayUnit WRITE setDefaultDisplayUnit NOTIFY defaultDisplayUnitChanged)
     Q_PROPERTY(QString displayUnitLabel READ displayUnitLabel NOTIFY displayUnitChanged)
     Q_PROPERTY(QString thirdPartyTransactionUrls READ thirdPartyTransactionUrls WRITE setThirdPartyTransactionUrls NOTIFY thirdPartyTransactionUrlsChanged)
     Q_PROPERTY(QString moneyFontChoice READ moneyFontChoice WRITE setMoneyFontChoice NOTIFY moneyFontChoiceChanged)
@@ -155,6 +156,9 @@ public:
     Q_INVOKABLE QString languageLabel(const QString& locale_tag) const;
     int displayUnit() const { return m_display_unit; }
     void setDisplayUnit(int new_display_unit);
+    int defaultDisplayUnit() const { return m_default_display_unit; }
+    void setDefaultDisplayUnit(int new_default_display_unit);
+    Q_INVOKABLE void toggleDisplayUnit();
     QString displayUnitLabel() const;
     Q_INVOKABLE QString displayUnitLabelForAmount(qint64 satoshi) const;
     QString thirdPartyTransactionUrls() const { return m_third_party_transaction_urls; }
@@ -195,6 +199,7 @@ Q_SIGNALS:
     void coreSettingStatusesChanged();
     void languageChanged();
     void displayUnitChanged(int new_display_unit);
+    void defaultDisplayUnitChanged(int new_default_display_unit);
     void thirdPartyTransactionUrlsChanged();
     void moneyFontChoiceChanged();
     void moneyFontChanged();
@@ -240,6 +245,7 @@ private:
     QString m_language;
     QStringList m_available_languages;
     int m_display_unit{0};
+    int m_default_display_unit{0};
     QString m_third_party_transaction_urls;
     QString m_money_font_choice;
     DirtySnapshot m_core_change_dirty_snapshot;

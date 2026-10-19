@@ -134,6 +134,7 @@ private Q_SLOTS:
     void displayUnitUsesQtCompatibleSettingsKey();
     void displayUnitUsesLegacyQtFallback();
     void displayUnitPrefersQmlSettingOverLegacyQtFallback();
+    void defaultDisplayUnitPersistsAndDrivesToggle();
     void sharedCoreSettingHelpersDeduplicateOverrides();
     void parameterInteractionOverridesPersistExplicitValues();
     void coreSettingsLegacyNumericOverridesWriteStrings();
@@ -1117,6 +1118,7 @@ void OptionsModelTests::resetGuiSettingsClearsLegacyQtSettings()
     legacy_core_settings.settings().setValue(QStringLiteral("addrProxy"), QStringLiteral("10.0.0.1:9050"));
     legacy_core_settings.settings().setValue(SettingsKeys::DISPLAY_UNIT, 3);
     legacy_default_settings.settings().setValue(SettingsKeys::DATA_DIR, QStringLiteral("/tmp/legacy-bitcoin-data"));
+    qml_core_settings.settings().setValue(SettingsKeys::DEFAULT_DISPLAY_UNIT, 2);
 
     std::vector<std::string> argv = TestArgv();
     argv.emplace_back("-settings=");
@@ -1130,6 +1132,7 @@ void OptionsModelTests::resetGuiSettingsClearsLegacyQtSettings()
     QVERIFY(!legacy_core_settings.settings().contains(QStringLiteral("fListen")));
     QVERIFY(!legacy_core_settings.settings().contains(QStringLiteral("addrProxy")));
     QVERIFY(!legacy_core_settings.settings().contains(SettingsKeys::DISPLAY_UNIT));
+    QVERIFY(!qml_core_settings.settings().contains(SettingsKeys::DEFAULT_DISPLAY_UNIT));
     QVERIFY(!legacy_default_settings.settings().contains(SettingsKeys::DATA_DIR));
 }
 
@@ -2262,6 +2265,80 @@ void OptionsModelTests::displayUnitUsesQtCompatibleSettingsKey()
         settings.setValue(SettingsKeys::DISPLAY_UNIT, previous_display_unit_setting);
     } else {
         settings.remove(SettingsKeys::DISPLAY_UNIT);
+    }
+}
+
+void OptionsModelTests::defaultDisplayUnitPersistsAndDrivesToggle()
+{
+    QSettings settings;
+    const bool had_display_unit_setting = settings.contains(SettingsKeys::DISPLAY_UNIT);
+    const QVariant previous_display_unit_setting = settings.value(SettingsKeys::DISPLAY_UNIT);
+    const bool had_default_unit_setting = settings.contains(SettingsKeys::DEFAULT_DISPLAY_UNIT);
+    const QVariant previous_default_unit_setting = settings.value(SettingsKeys::DEFAULT_DISPLAY_UNIT);
+    settings.setValue(SettingsKeys::DISPLAY_UNIT, 1);
+    settings.remove(SettingsKeys::DEFAULT_DISPLAY_UNIT);
+
+    MockNode node;
+
+    {
+        // Settings written before the default unit existed: the default falls
+        // back to the persisted display unit, keeping mBTC in the cycle.
+        OptionsQmlModel model(node);
+        QCOMPARE(model.defaultDisplayUnit(), 1);
+        model.toggleDisplayUnit();
+        QCOMPARE(model.displayUnit(), 3);
+        model.toggleDisplayUnit();
+        QCOMPARE(model.displayUnit(), 0);
+        model.toggleDisplayUnit();
+        QCOMPARE(model.displayUnit(), 1);
+    }
+
+    OptionsQmlModel model(node);
+    QSignalSpy default_spy(&model, &OptionsQmlModel::defaultDisplayUnitChanged);
+    QSignalSpy unit_spy(&model, &OptionsQmlModel::displayUnitChanged);
+
+    // Choosing a default persists it and switches the display unit to it.
+    model.setDefaultDisplayUnit(2);
+    QCOMPARE(model.defaultDisplayUnit(), 2);
+    QCOMPARE(model.displayUnit(), 2);
+    QCOMPARE(settings.value(SettingsKeys::DEFAULT_DISPLAY_UNIT).toInt(), 2);
+    QCOMPARE(settings.value(SettingsKeys::DISPLAY_UNIT).toInt(), 2);
+    QCOMPARE(default_spy.count(), 1);
+    QCOMPARE(unit_spy.count(), 1);
+
+    // Toggling changes only the display unit, never the default.
+    model.toggleDisplayUnit();
+    QCOMPARE(model.displayUnit(), 3);
+    QCOMPARE(model.defaultDisplayUnit(), 2);
+    QCOMPARE(settings.value(SettingsKeys::DEFAULT_DISPLAY_UNIT).toInt(), 2);
+
+    // Re-selecting the same default still switches back to it.
+    model.setDefaultDisplayUnit(2);
+    QCOMPARE(model.displayUnit(), 2);
+    QCOMPARE(default_spy.count(), 1);
+
+    // With BTC as the default the toggle flips between BTC and sat.
+    model.setDefaultDisplayUnit(0);
+    QCOMPARE(model.displayUnit(), 0);
+    model.toggleDisplayUnit();
+    QCOMPARE(model.displayUnit(), 3);
+    model.toggleDisplayUnit();
+    QCOMPARE(model.displayUnit(), 0);
+
+    // An out-of-range default normalizes to BTC.
+    model.setDefaultDisplayUnit(9);
+    QCOMPARE(model.defaultDisplayUnit(), 0);
+    QCOMPARE(model.displayUnit(), 0);
+
+    if (had_display_unit_setting) {
+        settings.setValue(SettingsKeys::DISPLAY_UNIT, previous_display_unit_setting);
+    } else {
+        settings.remove(SettingsKeys::DISPLAY_UNIT);
+    }
+    if (had_default_unit_setting) {
+        settings.setValue(SettingsKeys::DEFAULT_DISPLAY_UNIT, previous_default_unit_setting);
+    } else {
+        settings.remove(SettingsKeys::DEFAULT_DISPLAY_UNIT);
     }
 }
 

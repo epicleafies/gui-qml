@@ -432,6 +432,7 @@ void ClearLegacyGuiSettings(const QString& chain)
             store.settings->remove(key);
         }
         store.settings->remove(SettingsKeys::DISPLAY_UNIT);
+        store.settings->remove(SettingsKeys::DEFAULT_DISPLAY_UNIT);
         store.settings->sync();
     }
 

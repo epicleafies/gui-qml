@@ -1,4 +1,4 @@
-// Copyright (c) 2022 The Bitcoin Core developers
+// Copyright (c) 2022-2026 The Bitcoin Core developers
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -150,6 +150,10 @@ OptionsQmlModel::OptionsQmlModel(interfaces::Node& node, ArgsManager& args)
     }
     const int display_unit_fallback{QmlLegacySettings::ReadLegacyGuiDisplayUnit(QString::fromStdString(m_args.GetChainTypeString()), 0)};
     m_display_unit = NormalizeDisplayUnit(settings.value(SettingsKeys::DISPLAY_UNIT, display_unit_fallback).toInt());
+    // Settings written before the default unit existed fall back to the
+    // current display unit, so an existing mBTC or bits choice stays in the
+    // unit toggle cycle.
+    m_default_display_unit = NormalizeDisplayUnit(settings.value(SettingsKeys::DEFAULT_DISPLAY_UNIT, m_display_unit).toInt());
     m_third_party_transaction_urls = settings.value(SettingsKeys::THIRD_PARTY_TRANSACTION_URLS, "").toString();
     m_money_font_choice = settings.value(SettingsKeys::MONEY_FONT_CHOICE, MONEY_FONT_EMBEDDED).toString();
     if (m_money_font_choice != MONEY_FONT_EMBEDDED && m_money_font_choice != MONEY_FONT_BEST_SYSTEM) {
@@ -578,6 +582,24 @@ void OptionsQmlModel::setDisplayUnit(int new_display_unit)
         settings.setValue(SettingsKeys::DISPLAY_UNIT, m_display_unit);
         Q_EMIT displayUnitChanged(m_display_unit);
     }
+}
+
+void OptionsQmlModel::setDefaultDisplayUnit(int new_default_display_unit)
+{
+    new_default_display_unit = NormalizeDisplayUnit(new_default_display_unit);
+    if (new_default_display_unit != m_default_display_unit) {
+        m_default_display_unit = new_default_display_unit;
+        QSettings settings;
+        settings.setValue(SettingsKeys::DEFAULT_DISPLAY_UNIT, m_default_display_unit);
+        Q_EMIT defaultDisplayUnitChanged(m_default_display_unit);
+    }
+    // Choosing a default also switches the app to it right away.
+    setDisplayUnit(new_default_display_unit);
+}
+
+void OptionsQmlModel::toggleDisplayUnit()
+{
+    setDisplayUnit(QmlBitcoinUnits::nextToggleDisplayUnit(m_display_unit, m_default_display_unit));
 }
 
 void OptionsQmlModel::setThirdPartyTransactionUrls(const QString& urls)
