@@ -4,9 +4,12 @@
 
 #include <qml/bitcoinunits.h>
 
+#include <algorithm>
 #include <cassert>
 #include <cstdlib>
+#include <iterator>
 #include <limits>
+#include <vector>
 
 #include <QtGlobal>
 
@@ -98,6 +101,19 @@ QmlBitcoinUnits::Unit QmlBitcoinUnits::fromDisplayUnit(int display_unit)
     case 3: return Unit::SAT;
     }
     return Unit::BTC;
+}
+
+int QmlBitcoinUnits::nextToggleDisplayUnit(int display_unit, int default_display_unit)
+{
+    std::vector<int> cycle{0};
+    if (default_display_unit == 1 || default_display_unit == 2) {
+        cycle.push_back(default_display_unit);
+    }
+    cycle.push_back(3);
+    const auto it = std::find(cycle.begin(), cycle.end(), display_unit);
+    // A unit outside the cycle flips to sat, like the first press from BTC.
+    if (it == cycle.end()) return 3;
+    return std::next(it) == cycle.end() ? cycle.front() : *std::next(it);
 }
 
 QString QmlBitcoinUnits::label(Unit unit)

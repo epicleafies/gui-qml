@@ -23,6 +23,7 @@ private Q_SLOTS:
     void format_mbtc_and_ubtc();
     void format_sat_noDecimals();
     void display_unit_mapping_and_labels();
+    void next_toggle_display_unit_cycles_default_unit();
 };
 
 void QmlBitcoinUnitsTests::localized_amounts_data()
@@ -113,6 +114,30 @@ void QmlBitcoinUnitsTests::display_unit_mapping_and_labels()
     QCOMPARE(QmlBitcoinUnits::label(QmlBitcoinUnits::Unit::SAT, 2), QString("sats"));
     QCOMPARE(QmlBitcoinUnits::displayLabel(QmlBitcoinUnits::Unit::SAT, 1), QString("sat"));
     QCOMPARE(QmlBitcoinUnits::displayLabel(QmlBitcoinUnits::Unit::SAT, 2), QString("sats"));
+}
+
+void QmlBitcoinUnitsTests::next_toggle_display_unit_cycles_default_unit()
+{
+    // With BTC or sat as the default the toggle is a two-way flip.
+    QCOMPARE(QmlBitcoinUnits::nextToggleDisplayUnit(0, 0), 3);
+    QCOMPARE(QmlBitcoinUnits::nextToggleDisplayUnit(3, 0), 0);
+    QCOMPARE(QmlBitcoinUnits::nextToggleDisplayUnit(0, 3), 3);
+    QCOMPARE(QmlBitcoinUnits::nextToggleDisplayUnit(3, 3), 0);
+
+    // With mBTC as the default the cycle is BTC -> mBTC -> sat -> BTC.
+    QCOMPARE(QmlBitcoinUnits::nextToggleDisplayUnit(0, 1), 1);
+    QCOMPARE(QmlBitcoinUnits::nextToggleDisplayUnit(1, 1), 3);
+    QCOMPARE(QmlBitcoinUnits::nextToggleDisplayUnit(3, 1), 0);
+
+    // Same for bits.
+    QCOMPARE(QmlBitcoinUnits::nextToggleDisplayUnit(0, 2), 2);
+    QCOMPARE(QmlBitcoinUnits::nextToggleDisplayUnit(2, 2), 3);
+    QCOMPARE(QmlBitcoinUnits::nextToggleDisplayUnit(3, 2), 0);
+
+    // A unit outside the cycle flips to sat.
+    QCOMPARE(QmlBitcoinUnits::nextToggleDisplayUnit(1, 0), 3);
+    QCOMPARE(QmlBitcoinUnits::nextToggleDisplayUnit(2, 1), 3);
+    QCOMPARE(QmlBitcoinUnits::nextToggleDisplayUnit(9, 2), 3);
 }
 
 #ifdef BITCOINQML_NO_TEST_MAIN

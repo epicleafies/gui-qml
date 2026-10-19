@@ -33,6 +33,9 @@ public:
     static QString formatForDisplay(Unit unit, CAmount amount, bool plussign = false,
                                     const QLocale& locale = QLocale());
     static Unit fromDisplayUnit(int display_unit);
+    // Display unit a quick unit toggle switches to next. The toggle cycles
+    // BTC, the default unit when that is mBTC or bits, then sat.
+    static int nextToggleDisplayUnit(int display_unit, int default_display_unit);
     static QString label(Unit unit);
     static QString label(Unit unit, CAmount amount);
     static QString displayLabel(Unit unit, CAmount amount);

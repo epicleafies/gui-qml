@@ -11,6 +11,7 @@
 namespace SettingsKeys {
     inline constexpr const char* LANGUAGE     = "language";
     inline constexpr const char* DISPLAY_UNIT = "DisplayBitcoinUnit";
+    inline constexpr const char* DEFAULT_DISPLAY_UNIT = "DefaultBitcoinUnit";
     inline constexpr const char* DATA_DIR = "strDataDir";
     inline constexpr const char* THIRD_PARTY_TRANSACTION_URLS = "strThirdPartyTxUrls";
     inline constexpr const char* MONEY_FONT_CHOICE = "FontForMoney";
