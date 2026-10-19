@@ -7,6 +7,8 @@
 #include <test/mocks/mockwallet.h>
 #include <qml/models/bumptransactionmodel.h>
 
+#include <QLocale>
+#include <QScopeGuard>
 #include <QSignalSpy>
 
 #include <memory>
@@ -63,12 +65,28 @@ private Q_SLOTS:
             return true;
         };
 
+        const QLocale previous_locale;
+        const auto restore_locale = qScopeGuard([previous_locale] { QLocale::setDefault(previous_locale); });
+        QLocale::setDefault(QLocale{"en_US"});
+
         BumpTransactionModel model(wallet.get());
         model.prepareFeeBump(TEST_TXID, 1);
 
-        QVERIFY(!model.oldFee().isEmpty());
-        QVERIFY(!model.newFee().isEmpty());
-        QVERIFY(!model.feeIncrease().isEmpty());
+        QCOMPARE(model.oldFee(), QStringLiteral("0.00000500 BTC"));
+        QCOMPARE(model.newFee(), QStringLiteral("0.00001000 BTC"));
+        QCOMPARE(model.feeIncrease(), QStringLiteral("0.00000500 BTC"));
+
+        // The formatted fees follow the display unit.
+        QSignalSpy result_spy(&model, &BumpTransactionModel::resultChanged);
+        model.setDisplayUnit(3);
+        QCOMPARE(result_spy.count(), 1);
+        QCOMPARE(model.oldFee(), QStringLiteral("500 sats"));
+        QCOMPARE(model.newFee(), QStringLiteral("1,000 sats"));
+        QCOMPARE(model.feeIncrease(), QStringLiteral("500 sats"));
+        model.setDisplayUnit(2);
+        QCOMPARE(model.newFee(), QStringLiteral("10.00 bits"));
+        model.setDisplayUnit(2);
+        QCOMPARE(result_spy.count(), 2);
     }
 
     void prepareFeeBump_failureSetsErrorState()

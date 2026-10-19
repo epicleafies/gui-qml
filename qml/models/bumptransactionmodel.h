@@ -56,6 +56,7 @@ public:
     QString newTxid() const { return m_new_txid; }
     QString errorText() const { return m_error; }
     bool needsUnlock() const { return m_needs_unlock; }
+    void setDisplayUnit(int unit);
 
     Q_INVOKABLE void prepareFeeBump(const QString& txid, unsigned int targetBlocks);
     Q_INVOKABLE bool confirmFeeBump();
@@ -89,6 +90,7 @@ private:
     QString m_new_txid;
     QString m_error;
     bool m_needs_unlock{false};
+    int m_display_unit{0};
 };
 
 #endif // BITCOIN_QML_MODELS_BUMPTRANSACTIONMODEL_H
