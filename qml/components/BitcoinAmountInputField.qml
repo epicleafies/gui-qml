@@ -87,10 +87,6 @@ ColumnLayout {
         return 17
     }
 
-    function flippedDisplayUnit(unit) {
-        return unit === BitcoinAmount.SAT ? BitcoinAmount.BTC : BitcoinAmount.SAT
-    }
-
     Layout.fillWidth: true
     spacing: 4
 
@@ -273,7 +269,7 @@ ColumnLayout {
             unit: root.amount ? root.amount.unit : BitcoinAmount.BTC
             onClicked: {
                 amountInput.commitAmountText()
-                optionsModel.displayUnit = root.flippedDisplayUnit(root.amount.unit)
+                optionsModel.toggleDisplayUnit()
             }
         }
     }

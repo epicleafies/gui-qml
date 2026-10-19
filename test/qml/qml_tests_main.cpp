@@ -32,6 +32,7 @@
 
 #include <qml/backendexecutor.h>
 #include <qml/bitcoinamount.h>
+#include <qml/bitcoinunits.h>
 #include <qml/components/blockclockdial.h>
 #include <qml/controls/linegraph.h>
 
@@ -2305,6 +2306,7 @@ class MockOptionsModel : public QObject
     Q_PROPERTY(QString dataDir MEMBER m_data_dir NOTIFY dataDirChanged)
     Q_PROPERTY(QString getDefaultDataDirString READ getDefaultDataDirString CONSTANT)
     Q_PROPERTY(int displayUnit READ displayUnit WRITE setDisplayUnit NOTIFY displayUnitChanged)
+    Q_PROPERTY(int defaultDisplayUnit READ defaultDisplayUnit WRITE setDefaultDisplayUnit NOTIFY defaultDisplayUnitChanged)
     Q_PROPERTY(QString displayUnitLabel READ displayUnitLabel NOTIFY displayUnitChanged)
     Q_PROPERTY(QString languageSummary READ languageSummary NOTIFY languageChanged)
     Q_PROPERTY(QString language READ language WRITE setLanguage NOTIFY languageChanged)
@@ -2524,6 +2526,14 @@ public:
     void setDisplayUnit(int u) {
         if (u != m_displayUnit) { m_displayUnit = u; Q_EMIT displayUnitChanged(u); }
     }
+    int defaultDisplayUnit() const { return m_defaultDisplayUnit; }
+    void setDefaultDisplayUnit(int u) {
+        if (u != m_defaultDisplayUnit) { m_defaultDisplayUnit = u; Q_EMIT defaultDisplayUnitChanged(u); }
+        setDisplayUnit(u);
+    }
+    Q_INVOKABLE void toggleDisplayUnit() {
+        setDisplayUnit(QmlBitcoinUnits::nextToggleDisplayUnit(m_displayUnit, m_defaultDisplayUnit));
+    }
     QString displayUnitLabel() const
     {
         if (m_displayUnit == 1) return QStringLiteral("mBTC");
@@ -2588,6 +2598,7 @@ Q_SIGNALS:
     void pruneSizeGBChanged();
     void dataDirChanged();
     void displayUnitChanged(int unit);
+    void defaultDisplayUnitChanged(int unit);
     void languageChanged();
     void connectionSettingsDirtyChanged();
     void storageSettingsDirtyChanged();
@@ -2608,6 +2619,7 @@ Q_SIGNALS:
 
 private:
     int m_displayUnit{0};
+    int m_defaultDisplayUnit{0};
     QString m_language;
 };
 

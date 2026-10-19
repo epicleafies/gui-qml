@@ -44,6 +44,7 @@ TestCase {
         nodeModel.fatalException = false
         nodeModel.setStartupErrorForTest("")
         desktopWindowBehaviorModel.minimizeOnClose = false
+        optionsModel.defaultDisplayUnit = BitcoinAmount.BTC
         shutdownSpy.clear()
     }
 
@@ -221,6 +222,22 @@ TestCase {
         compare(optionsModel.displayUnit, BitcoinAmount.SAT)
         menuActions.toggleDisplayUnit.trigger()
         compare(optionsModel.displayUnit, BitcoinAmount.BTC)
+    }
+
+    function test_edit_menu_toggle_cycles_through_default_unit() {
+        const window = createMain(true)
+        const menuActions = findChild(window, "desktopMenuActions")
+        verify(menuActions !== null)
+
+        optionsModel.defaultDisplayUnit = BitcoinAmount.MicroBTC
+        compare(optionsModel.displayUnit, BitcoinAmount.MicroBTC)
+        menuActions.toggleDisplayUnit.trigger()
+        compare(optionsModel.displayUnit, BitcoinAmount.SAT)
+        menuActions.toggleDisplayUnit.trigger()
+        compare(optionsModel.displayUnit, BitcoinAmount.BTC)
+        menuActions.toggleDisplayUnit.trigger()
+        compare(optionsModel.displayUnit, BitcoinAmount.MicroBTC)
+        compare(optionsModel.defaultDisplayUnit, BitcoinAmount.MicroBTC)
     }
 
     function test_undo_does_not_modify_hidden_send_field() {
