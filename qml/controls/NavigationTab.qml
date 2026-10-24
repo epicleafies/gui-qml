@@ -18,6 +18,7 @@ Button {
 
     id: root
     checkable: true
+    Accessible.role: Accessible.PageTab
     hoverEnabled: AppMode.isDesktop
     implicitHeight: 60
     implicitWidth: 80
