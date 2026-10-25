@@ -128,7 +128,7 @@ ColumnLayout {
         }
     }
 
-    ContinueButton {
+    PrimaryButton {
         objectName: "addressDetailsCreatePaymentRequestButton"
         Layout.fillWidth: true
         Layout.topMargin: 24
