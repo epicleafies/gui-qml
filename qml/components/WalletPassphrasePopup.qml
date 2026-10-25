@@ -26,7 +26,7 @@ AlertPopup {
     objectName: popupObjectName
     title: titleText
     message: descriptionText
-    initialFocusItem: passphraseField
+    initialFocusItem: passphraseField.field
     implicitWidth: Math.max(420, horizontalActionsWidth + 40)
 
     function clearPassphraseField() {
@@ -47,18 +47,13 @@ AlertPopup {
     onClosed: clearPassphraseField()
     Component.onDestruction: clearPassphraseField()
 
-    content: CoreTextField {
+    content: PasswordTextField {
         id: passphraseField
-        objectName: root.passphraseFieldObjectName
         Layout.fillWidth: true
-        hideText: true
+        label: qsTr("Password")
+        fieldObjectName: root.passphraseFieldObjectName
         placeholderText: qsTr("Enter password…")
-        background: Rectangle {
-            color: Theme.color.surface2
-            radius: Theme.radius.s
-            border.color: Theme.color.surface2
-            border.width: 1
-        }
+        fieldBackgroundColor: Theme.color.surface2
         onAccepted: {
             if (root.canSubmit) {
                 root.submitPassphrase()

@@ -143,7 +143,7 @@ TestCase {
         page.errorText = "The current password is incorrect."
         tryCompare(banner, "visible", true)
         compare(resultText.text, "The current password is incorrect.")
-        compare(banner.iconSource.toString(), "image://images/info-filled")
+        compare(banner.iconSource.toString(), "image://images/alert-filled")
         compare(banner.textColor, Theme.color.dangerText)
 
         page.clearResult()

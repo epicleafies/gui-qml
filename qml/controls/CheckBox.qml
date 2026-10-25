@@ -4,6 +4,7 @@
 
 import QtQuick 2.15
 import QtQuick.Controls 2.15 as Controls
+import QtQuick.Layouts 1.15
 import org.bitcoincore.qt 1.0
 
 Controls.CheckBox {
@@ -13,10 +14,13 @@ Controls.CheckBox {
     property color borderColor: Theme.color.controlBorder
     property color checkColor: Theme.color.accentForeground
     property bool animationsEnabled: Theme.motion.animated
+    // Secondary line under the label, such as "Recommended".
+    property string description: ""
 
     padding: 0
     spacing: 10
-    implicitHeight: Theme.size.controlSmall
+    implicitHeight: Math.max(Theme.size.controlSmall, implicitContentHeight + topPadding + bottomPadding)
+    Accessible.description: description
     focusPolicy: Qt.StrongFocus
     hoverEnabled: AppMode.isDesktop
 
@@ -110,13 +114,31 @@ Controls.CheckBox {
         }
     }
 
-    contentItem: CoreText {
-        text: root.text
-        leftPadding: root.indicator.width + root.spacing
-        verticalAlignment: Text.AlignVCenter
-        horizontalAlignment: Text.AlignLeft
-        textStyle: Theme.text.description
-        color: root.enabled ? Theme.color.neutral7 : Theme.color.disabledContent
-        wrapMode: Text.WordWrap
+    contentItem: ColumnLayout {
+        spacing: Theme.space.xxs
+
+        CoreText {
+            Layout.fillWidth: true
+            Layout.leftMargin: root.indicator.width + root.spacing
+            text: root.text
+            verticalAlignment: Text.AlignVCenter
+            horizontalAlignment: Text.AlignLeft
+            textStyle: Theme.text.description
+            color: root.enabled ? Theme.color.neutral7 : Theme.color.disabledContent
+            wrapMode: Text.WordWrap
+            Accessible.ignored: true
+        }
+
+        CoreText {
+            visible: root.description.length > 0
+            Layout.fillWidth: true
+            Layout.leftMargin: root.indicator.width + root.spacing
+            text: root.description
+            horizontalAlignment: Text.AlignLeft
+            textStyle: Theme.text.caption
+            color: root.enabled ? Theme.color.neutral7 : Theme.color.disabledContent
+            wrapMode: Text.WordWrap
+            Accessible.ignored: true
+        }
     }
 }

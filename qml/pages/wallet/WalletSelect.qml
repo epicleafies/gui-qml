@@ -220,12 +220,10 @@ Popup {
                     stateColor: delegate.down ? Theme.color.surfacePressed
                         : delegate.checked ? Theme.color.surfaceSelected
                         : delegate.hovered ? Theme.color.surfaceHover : "transparent"
-                    Rectangle {
+                    Separator {
                         visible: delegate.loadState === WalletListModel.Open
                             && delegate.index > 0 && !delegate.checked && !delegate.hovered
                         width: parent.width
-                        height: 1
-                        color: Theme.color.surfaceDivider
                     }
 
                     FocusBorder {
@@ -312,24 +310,19 @@ Popup {
                             }
                         }
 
-                        IconButton {
+                        OverflowMenuButton {
                             id: actionsButton
                             objectName: "walletSelectActions_" + delegate.name.replace(/[^A-Za-z0-9_]/g, "_")
                             anchors.right: parent.right
                             anchors.verticalCenter: parent.verticalCenter
                             visible: delegate.loadState !== WalletListModel.Loading
                             enabled: visible && !walletController.walletLoadInProgress
-                            size: 24
-                            iconSize: 18
-                            iconSource: "image://images/ellipsis"
+                            size: Theme.size.controlSmall
                             iconColor: delegate.nameColor
-                            backgroundRadius: 6
-                            accessibleName: qsTr("Actions for %1").arg(delegate.displayName)
-                            background: StateBackground {
-                                radius: actionsButton.backgroundRadius
-                                stateColor: actionsButton.pressed ? Theme.color.surfacePressed
-                                    : actionsButton.hovered ? Theme.color.surfaceHover : "transparent"
-                            }
+                            activeIconColor: Theme.color.neutral9
+                            backgroundColor: "transparent"
+                            hoverBackgroundColor: actionsButton.down ? Theme.color.surfacePressed : Theme.color.surfaceHover
+                            Accessible.name: qsTr("Actions for %1").arg(delegate.displayName)
                             onClicked: actionsMenu.visible ? actionsMenu.close() : actionsMenu.open()
 
                             ContextMenu {
@@ -348,6 +341,8 @@ Popup {
                                 Component.onDestruction: {
                                     if (root.activeContextMenu === actionsMenu) root.activeContextMenu = null
                                 }
+                                // Modeless, so a second press on the trigger reaches it and toggles.
+                                modal: false
                                 closePolicy: Popup.CloseOnEscape | Popup.CloseOnPressOutsideParent
                                 backgroundColor: Theme.color.surface2
                                 // Close immediately before the owning row can be removed or reordered.
@@ -389,11 +384,11 @@ Popup {
                             }
                         }
 
-                        BusyIndicator {
+                        SpinningIndicator {
                             anchors.right: parent.right
                             anchors.verticalCenter: parent.verticalCenter
-                            width: 24
-                            height: 24
+                            size: Theme.size.icon.l
+                            color: Theme.color.neutral7
                             running: delegate.loadState === WalletListModel.Loading
                             visible: running
                         }

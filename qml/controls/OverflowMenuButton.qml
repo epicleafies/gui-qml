@@ -17,7 +17,8 @@ NeutralButton {
     readonly property alias iconItem: ellipsisIcon
 
     iconSource: "image://images/ellipsis"
-    iconSize: 40
+    // Ellipsis artwork is drawn on a 24-unit grid; 20 suits every target size.
+    iconSize: Theme.size.icon.l
     backgroundColor: Theme.color.surface(surfaceLevel + 1)
     hoverBackgroundColor: Theme.color.surface(surfaceLevel + 2)
     showBorder: surfaceLevel > 0

@@ -40,6 +40,29 @@ TestCase {
     }
 
     Component {
+        id: keyboardMenuComponent
+
+        ContextMenu {
+            property alias first: firstItem
+            property alias second: secondItem
+            property alias last: lastItem
+            ContextMenuButton { id: firstItem; text: "First" }
+            ContextMenuButton { id: secondItem; text: "Second" }
+            ContextMenuButton { text: "Disabled"; enabled: false }
+            ContextMenuDivider {}
+            ContextMenuButton { id: lastItem; text: "Last" }
+        }
+    }
+
+    Item {
+        id: trigger
+        x: 300
+        y: 40
+        width: 40
+        height: 40
+    }
+
+    Component {
         id: menuWithButtonComponent
 
         ContextMenu {
@@ -157,5 +180,36 @@ TestCase {
         keyClick(Qt.Key_Space)
         compare(menu.triggerCount, 1)
         tryCompare(menu, "opened", false)
+    }
+
+    function test_arrowKeysMoveBetweenEnabledItems() {
+        const menu = createTemporaryObject(keyboardMenuComponent, host)
+        menu.open()
+        tryCompare(menu, "opened", true)
+        keyClick(Qt.Key_Down)
+        verify(menu.first.activeFocus)
+        keyClick(Qt.Key_Down)
+        verify(menu.second.activeFocus)
+        keyClick(Qt.Key_Down)
+        verify(menu.last.activeFocus)
+        keyClick(Qt.Key_Down)
+        verify(menu.first.activeFocus)
+        keyClick(Qt.Key_Up)
+        verify(menu.last.activeFocus)
+        keyClick(Qt.Key_Home)
+        verify(menu.first.activeFocus)
+        keyClick(Qt.Key_End)
+        verify(menu.last.activeFocus)
+    }
+
+    function test_openBelowAlignsRightEdgeAndStaysInWindow() {
+        const menu = createTemporaryObject(keyboardMenuComponent, host)
+        menu.openBelow(trigger, 4)
+        tryCompare(menu, "opened", true)
+        compare(menu.y, trigger.y + trigger.height + 4)
+        compare(menu.x + menu.width, trigger.x + trigger.width)
+        verify(menu.modal)
+        compare(menu.dim, false)
+        compare(menu.margins, Theme.space.ml)
     }
 }

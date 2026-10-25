@@ -5,6 +5,7 @@
 import QtQuick 2.15
 import QtQuick.Controls 2.15
 import QtQuick.Layouts 1.15
+import org.bitcoincore.qt 1.0
 
 Control {
     id: root
@@ -59,7 +60,7 @@ Control {
             id: segments
             model: root.model
 
-            ToggleButton {
+            Segment {
                 required property int index
                 required property var modelData
 
@@ -71,14 +72,6 @@ Control {
                 autoExclusive: true
                 checked: index === root.currentIndex
                 text: root.optionText(modelData)
-                bgRadius: Theme.radius.s
-                textColor: Theme.color.neutral9
-                textHoverColor: checked ? Theme.color.accentForeground : Theme.color.neutral9
-                textActiveColor: Theme.color.accentForeground
-                textActiveBold: true
-                bgHoverColor: checked ? Theme.color.accent : Theme.color.surface3
-                bgActiveColor: Theme.color.accent
-                bgDefaultColor: Theme.color.surface2
                 Accessible.role: Accessible.PageTab
                 Keys.onLeftPressed: root.moveSelection(index - 1)
                 Keys.onRightPressed: root.moveSelection(index + 1)
@@ -87,6 +80,49 @@ Control {
                     root.selected(index, modelData)
                 }
             }
+        }
+    }
+
+    // The selected segment is the one orange control in the app.
+    component Segment: Button {
+        id: segment
+
+        checkable: true
+        hoverEnabled: AppMode.isDesktop
+        focusPolicy: Qt.StrongFocus
+        leftPadding: Theme.space.ml
+        rightPadding: Theme.space.ml
+        topPadding: 5
+        bottomPadding: 5
+
+        contentItem: CoreText {
+            text: segment.text
+            textStyle: segment.checked ? Theme.text.captionStrong : Theme.text.caption
+            color: segment.checked ? Theme.color.accentForeground : Theme.color.neutral9
+
+            Behavior on color {
+                enabled: Theme.motion.animated
+                ColorAnimation { duration: Theme.motion.normal }
+            }
+        }
+
+        background: Rectangle {
+            color: segment.checked ? Theme.color.accent
+                : segment.hovered ? Theme.color.surface3
+                : Theme.color.surface2
+            radius: Theme.radius.s
+
+            Behavior on color {
+                enabled: Theme.motion.animated
+                ColorAnimation { duration: Theme.motion.normal }
+            }
+        }
+
+        FocusBorder {
+            objectName: segment.objectName.length > 0 ? segment.objectName + "FocusBorder" : ""
+            visible: segment.visualFocus
+            targetRadius: Theme.radius.s
+            z: 1
         }
     }
 }

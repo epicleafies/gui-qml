@@ -18,18 +18,19 @@ ColumnLayout {
 
     spacing: Theme.space.xxl
 
-    SettingsRestartNotice {
-        visible: root.showRestartNotice
+    ToastBanner {
+        shown: root.showRestartNotice
         Layout.fillWidth: true
+        text: qsTr("Restart the application for these changes to take effect.")
     }
 
     FormSection {
         objectName: "developerSettingsSection"
         Layout.fillWidth: true
         surfaceLevel: root.surfaceLevel
-        showGradientBorder: false
 
         TextFieldRow {
+            surfaceLevel: root.surfaceLevel
             id: dbcacheRow
             Layout.fillWidth: true
             title: qsTr("Database cache size (MiB)")
@@ -64,6 +65,7 @@ ColumnLayout {
         }
 
         TextFieldRow {
+            surfaceLevel: root.surfaceLevel
             id: scriptThreadsRow
             Layout.fillWidth: true
             title: qsTr("Script verification threads")

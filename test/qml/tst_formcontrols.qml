@@ -116,10 +116,32 @@ TestCase {
     }
 
     Component {
-        id: outlineButtonComponent
+        id: switchRowComponent
 
-        OutlineButton {
-            objectName: "exampleOutlineButton"
+        SwitchRow {
+            objectName: "exampleSwitchRow"
+            width: 400
+            title: "Open at login"
+        }
+    }
+
+    Component {
+        id: optionButtonComponent
+
+        OptionButton {
+            property string model: "a"
+            width: 300
+            text: "Option B"
+            selected: model === "b"
+        }
+    }
+
+    Component {
+        id: largeNeutralButtonComponent
+
+        NeutralButton {
+            objectName: "exampleLargeNeutralButton"
+            buttonSize: NeutralButton.Large
             width: 140
             height: 46
             text: "Cancel"
@@ -401,11 +423,59 @@ TestCase {
         compare(picker.currentValue, "dark")
     }
 
-    function test_outlineButtonUsesLargeNeutralAppearance() {
+    function test_switchRowFlipsOnceFromRowOrSwitch() {
+        const row = createTemporaryObject(switchRowComponent, host)
+        verify(row !== null)
+        const toggle = findChild(row, "exampleSwitchRowSwitch")
+        verify(toggle !== null)
+        verify(waitForRendering(row))
+        let toggles = 0
+        row.toggled.connect(function() { toggles += 1 })
+
+        mouseClick(row, Theme.space.cardInset + 4, row.height / 2)
+        compare(row.checked, true)
+        compare(toggles, 1)
+        mouseClick(toggle)
+        compare(row.checked, false)
+        compare(toggles, 2)
+        toggle.forceActiveFocus()
+        keyClick(Qt.Key_Space)
+        compare(row.checked, true)
+        compare(toggles, 3)
+
+        row.enabled = false
+        mouseClick(row, Theme.space.cardInset + 4, row.height / 2)
+        compare(row.checked, true)
+        compare(toggles, 3)
+    }
+
+    function test_optionButtonSelectionStaysBoundToTheModel() {
+        const option = createTemporaryObject(optionButtonComponent, host)
+        verify(option !== null)
+        compare(option.checked, false)
+        compare(option.Accessible.role, Accessible.RadioButton)
+
+        // A click the caller ignores leaves the tile unselected...
+        mouseClick(option)
+        compare(option.checked, false)
+        option.forceActiveFocus()
+        keyClick(Qt.Key_Space)
+        compare(option.checked, false)
+
+        // ...and the binding still follows the model afterwards.
+        option.model = "b"
+        compare(option.checked, true)
+        mouseClick(option)
+        compare(option.checked, true)
+        option.model = "a"
+        compare(option.checked, false)
+    }
+
+    function test_largeNeutralButtonAppearance() {
         Theme.motion.mode = "full"
-        const button = createTemporaryObject(outlineButtonComponent, host)
+        const button = createTemporaryObject(largeNeutralButtonComponent, host)
         verify(button !== null)
-        const background = findChild(button, "exampleOutlineButtonBackground")
+        const background = findChild(button, "exampleLargeNeutralButtonBackground")
         verify(background !== null)
 
         compare(button.buttonSize, NeutralButton.Large)
@@ -536,13 +606,15 @@ TestCase {
         compare(value.text, "v32.0")
     }
 
-    function test_pageHeadingCentersProminentDescription() {
+    function test_pageHeadingAlignsDescriptionWithTitle() {
         const heading = createTemporaryObject(pageHeadingComponent, host)
         verify(heading !== null)
         const description = findChild(heading, "exampleHeadingDescription")
         verify(description !== null)
         compare(heading.descriptionTextStyle.font.pixelSize, Theme.text.description.font.pixelSize)
         compare(description.font.pixelSize, Theme.text.description.font.pixelSize)
+        compare(description.horizontalAlignment, Text.AlignLeft)
+        heading.titleAlignment = Text.AlignHCenter
         compare(description.horizontalAlignment, Text.AlignHCenter)
     }
 
@@ -563,12 +635,17 @@ TestCase {
         verify(row !== null)
         verify(row.field !== null)
         compare(row.field.objectName, "exampleTextField")
-        compare(row.field, row.loadedTrailingItem)
+        compare(row.loadedTrailingAccessory, null)
         compare(row.loadedBodyItem, null)
         compare(row.text, "127.0.0.1:9050")
         compare(row.field.horizontalAlignment, Text.AlignRight)
         compare(row.focusBorderColor, Theme.color.neutral6)
-        compare(row.field.background.ringColor, Theme.color.neutral6)
+        compare(row.fieldFocusRing.ringColor, Theme.color.neutral6)
+        // The field is filled one level above its card, so it reads as editable when empty.
+        verify(Qt.colorEqual(row.field.background.color, Theme.color.surface2))
+        row.surfaceLevel = 1
+        verify(Qt.colorEqual(row.field.background.color, Theme.color.surface3))
+        row.surfaceLevel = 0
 
         row.text = "127.0.0.1:9150"
         compare(row.field.text, "127.0.0.1:9150")

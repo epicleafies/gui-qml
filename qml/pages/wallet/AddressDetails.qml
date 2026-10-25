@@ -64,7 +64,7 @@ ColumnLayout {
 
             trailingItem: AddressLabel {
                 objectName: "addressDetailsAddressLabel"
-                width: Math.min(380, Math.max(200, root.width * 0.68))
+                Layout.preferredWidth: Math.min(380, Math.max(200, root.width * 0.68))
                 address: root.address
                 surfaceLevel: 2
                 textStyle: Theme.text.monoCaption
@@ -91,6 +91,8 @@ ColumnLayout {
             objectName: "addressDetailsNoteRow"
             visible: root.canEditLabel
             Layout.fillWidth: true
+            // The card is surface2.
+            surfaceLevel: 1
             //: Private address note, also used as the payment request's note to self.
             title: qsTr("Note to self")
             fieldObjectName: "addressDetailsNoteField"
