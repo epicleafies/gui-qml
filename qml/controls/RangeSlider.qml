@@ -64,6 +64,7 @@ Controls.RangeSlider {
     }
 
     component Thumb: Rectangle {
+        id: thumb
         required property var node
         // Read by the accessibility value interface of each handle.
         readonly property real value: node.value
@@ -86,6 +87,14 @@ Controls.RangeSlider {
         color: root.thumbColor
         border.width: 1
         border.color: Theme.color.controlBorder
-        FocusBorder { visible: root.visualFocus && parent.activeFocus; borderRadius: 14 }
+        // Qt 6.5 and older report OtherFocusReason when Tab reaches a handle,
+        // so visualFocus stays false there; hide the ring only after a press.
+        property bool pointerFocus: false
+        Connections {
+            target: thumb.node
+            function onPressedChanged() { if (thumb.node.pressed) thumb.pointerFocus = true }
+        }
+        onActiveFocusChanged: if (!activeFocus) pointerFocus = false
+        FocusBorder { visible: thumb.activeFocus && (root.visualFocus || !thumb.pointerFocus); borderRadius: 14 }
     }
 }
