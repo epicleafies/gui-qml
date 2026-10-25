@@ -91,7 +91,7 @@ ColumnLayout {
                         width: 32
                         x: index / (root.blockTargets.length - 1) * (parent.width - width)
                         text: index === root.blockTargets.length - 1 ? qsTr("50+") : modelData
-                        font: Theme.text.caption.font
+                        textStyle: Theme.text.caption
                         color: Theme.color.neutral6
                         horizontalAlignment: Text.AlignHCenter
                     }
@@ -105,7 +105,7 @@ ColumnLayout {
         Layout.fillWidth: true
         title: qsTr("Fee rate")
         value: !root.walletModel || root.walletModel.feeEstimatePending || root.walletModel.estimatedFeeSatoshi < 0
-            ? "—" : root.walletModel.estimatedFeeRate + " sat/vB"
+            ? "—" : qsTr("%1 sat/vB").arg(root.walletModel.estimatedFeeRate)
         valueTextStyle: Theme.text.monoDescription
     }
 
@@ -134,7 +134,6 @@ ColumnLayout {
         value: root.walletModel && !root.walletModel.feeEstimatePending && root.walletModel.estimatedFeeSatoshi >= 0
             ? fee.localizedDisplay : "—"
         valueUnit: fee.unitLabel
-        valueTextStyle: Theme.text.monoDescription
     }
 
     CoreText { objectName: "feeSelectionCustomEstimateLabel"; visible: false; text: fee.displayWithUnit }
