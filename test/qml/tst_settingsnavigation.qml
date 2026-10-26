@@ -829,6 +829,22 @@ TestCase {
         compare(Theme.reduceMotion, !reduceMotion)
         Theme.reduceMotion = reduceMotion
 
+        const textSizeSlider = findChild(view, "displayTextSizeSlider")
+        verify(textSizeSlider !== null)
+        const textScale = Theme.textScale
+        try {
+            Theme.textScale = 1
+            compare(textSizeSlider.value, 3)
+            compare(textSizeSlider.stepCount, 6)
+            textSizeSlider.value = 5
+            textSizeSlider.moved()
+            compare(Theme.textScale, Theme.textScales[5])
+            Theme.textScale = Theme.textScales[0]
+            compare(textSizeSlider.value, 0)
+        } finally {
+            Theme.textScale = textScale
+        }
+
         designSystemRow.clicked()
         tryCompare(view.pageContainer, "depth", 2)
         verify(findChild(view, "displayDesignSystemPage") !== null)

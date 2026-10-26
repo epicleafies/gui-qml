@@ -83,6 +83,7 @@ SettingsPage {
             objectName: "displayMoneyFontRow"
             Layout.fillWidth: true
             title: qsTr("Money font")
+            showDivider: false
             trailingItem: PopupPicker {
                 objectName: "displayMoneyFontPicker"
                 surfaceLevel: 1
@@ -103,6 +104,55 @@ SettingsPage {
                 ]
                 onActivated: function(value) {
                     optionsModel.moneyFontChoice = value
+                }
+            }
+        }
+    }
+
+    FormSection {
+        objectName: "displayAccessibilitySection"
+        Layout.fillWidth: true
+        title: qsTr("Accessibility")
+
+        FormRow {
+            objectName: "displayTextSizeRow"
+            Layout.fillWidth: true
+            title: qsTr("Text size")
+            bodyItem: RowLayout {
+                Layout.fillWidth: true
+                spacing: Theme.space.l
+
+                CoreText {
+                    Layout.alignment: Qt.AlignTop
+                    Layout.topMargin: textSizeSlider.trackCenterY - height / 2
+                    text: "A"
+                    textStyle: Theme.text.captionStrong
+                    color: Theme.color.neutral7
+                    Accessible.ignored: true
+                }
+
+                Slider {
+                    id: textSizeSlider
+                    objectName: "displayTextSizeSlider"
+                    Layout.fillWidth: true
+                    discrete: true
+                    showsTickMarks: true
+                    from: 0
+                    to: Theme.textScales.length - 1
+                    // Not a plain binding: dragging writes value, which would break it.
+                    Binding on value { value: Math.max(0, Theme.textScales.indexOf(Theme.textScale)) }
+                    tickLabels: [{ value: Theme.textScales.indexOf(1), text: qsTr("Default") }]
+                    Accessible.name: qsTr("Text size")
+                    onMoved: Theme.textScale = Theme.textScales[Math.round(value)]
+                }
+
+                CoreText {
+                    Layout.alignment: Qt.AlignTop
+                    Layout.topMargin: textSizeSlider.trackCenterY - height / 2
+                    text: "A"
+                    textStyle: Theme.text.headline
+                    color: Theme.color.neutral7
+                    Accessible.ignored: true
                 }
             }
         }
