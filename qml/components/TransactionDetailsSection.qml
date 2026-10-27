@@ -14,6 +14,8 @@ ColumnLayout {
     property bool showTransactionId: true
     property bool showBlock: true
     property bool showRawTransaction: true
+    property bool hidesAmounts: false
+    readonly property bool amountsHidden: hidesAmounts && optionsModel.hideAmounts
     readonly property var flow: details.flow || ({})
     readonly property bool coinbase: !!flow.coinbase
     readonly property string unavailable: qsTr("Unavailable")
@@ -21,6 +23,7 @@ ColumnLayout {
         {key: "Timestamp", title: qsTr("Timestamp"), value: details.timestamp !== undefined && details.timestamp !== null
             ? Qt.formatDateTime(new Date(Number(details.timestamp) * 1000), "yyyy-MM-dd hh:mm:ss") : unavailable},
         {key: "Fee", title: qsTr("Network fee"), value: coinbase ? qsTr("Not applicable")
+            : details.feeKnown && amountsHidden ? "∗∗∗∗∗∗∗∗∗∗"
             : details.feeKnown ? qsTr("%1 sats").arg(Number(details.feeSat).toLocaleString(Qt.locale(), 'f', 0)) : unavailable},
         {key: "FeeRate", mono: true, title: qsTr("Fee rate"), value: coinbase ? qsTr("Not applicable")
             : details.feeRateSatPerVb !== undefined && details.feeRateSatPerVb !== null

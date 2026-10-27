@@ -83,7 +83,6 @@ SettingsPage {
             objectName: "displayMoneyFontRow"
             Layout.fillWidth: true
             title: qsTr("Money font")
-            showDivider: false
             trailingItem: PopupPicker {
                 objectName: "displayMoneyFontPicker"
                 surfaceLevel: 1
@@ -106,6 +105,16 @@ SettingsPage {
                     optionsModel.moneyFontChoice = value
                 }
             }
+        }
+
+        SwitchRow {
+            objectName: "displayHideAmountsRow"
+            Layout.fillWidth: true
+            title: qsTr("Hide amounts")
+            description: qsTr("Mask your balance and activity amounts.")
+            showDivider: false
+            checked: optionsModel.hideAmounts
+            onToggled: optionsModel.hideAmounts = checked
         }
     }
 

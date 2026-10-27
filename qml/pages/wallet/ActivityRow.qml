@@ -117,7 +117,7 @@ Item {
         focusPolicy: Qt.StrongFocus
         Accessible.role: Accessible.ListItem
         Accessible.name: root.hasLabel ? root.displayLabel : root.address || qsTr("Transaction")
-        Accessible.description: [root.hasAmount ? root.amount : "", root.address, root.metadata,
+        Accessible.description: [!root.hasAmount ? "" : optionsModel.hideAmounts ? qsTr("Hidden amount") : root.amount, root.address, root.metadata,
             root.hasChildren ? qsTr("%1 actions").arg(root.actions.length) : ""].filter(function(value) { return value.length > 0 }).join(". ")
         onClicked: root.activated(root.txid, root.requestId, root.isPendingRequest)
         HoverHandler {
@@ -375,6 +375,7 @@ Item {
     }
 
     component AmountText: BitcoinAmountDisplayLabel {
+        hidesAmount: true
         textStyle: Theme.text.amountDescription
         horizontalAlignment: Text.AlignRight
         wrap: false
