@@ -79,7 +79,6 @@ OnboardingView {
             objectName: "externalSignerSetupPathSection"
             Layout.fillWidth: true
             namePrefix: "externalSignerSetup"
-            showCheckButton: false
             // The step sits on a dialog, so the card is one level up.
             surfaceLevel: root.surfaceLevel
             // Named as on the external signer settings page: the field takes
