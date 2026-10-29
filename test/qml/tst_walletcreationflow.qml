@@ -185,6 +185,8 @@ TestCase {
         compare(setup.showBackButton, true)
         verify(findChild(setup, "externalSignerSetupReleasesLink") !== null)
         verify(findChild(setup, "externalSignerSetupGuideLink") !== null)
+        compare(findChild(setup, "externalSignerSetupDownloadWarning").text,
+                "Only use HWI downloaded from its official releases page. A modified executable can steal your coins.")
         verify(findChild(setup, "externalSignerSetupBrowseButton") !== null)
         const pathSection = findChild(setup, "externalSignerSetupPathSection")
         compare(pathSection.title, "HWI executable")
