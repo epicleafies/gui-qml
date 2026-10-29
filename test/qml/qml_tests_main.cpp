@@ -1828,6 +1828,7 @@ class MockWalletController : public QObject
     Q_PROPERTY(bool externalSignerPathConfigured MEMBER m_external_signer_path_configured NOTIFY externalSignerStatusChanged)
     Q_PROPERTY(bool externalSignerResponding MEMBER m_external_signer_responding NOTIFY externalSignerStatusChanged)
     Q_PROPERTY(int externalSignerCount MEMBER m_external_signer_count NOTIFY externalSignerStatusChanged)
+    // How often the signer was checked, so tests can tell which actions check it.
     Q_PROPERTY(QString externalSignerName MEMBER m_external_signer_name NOTIFY externalSignerStatusChanged)
     Q_PROPERTY(QString externalSignerError MEMBER m_external_signer_error NOTIFY externalSignerStatusChanged)
     Q_PROPERTY(QString suggestedExternalSignerWalletName MEMBER m_suggested_external_signer_wallet_name NOTIFY externalSignerStatusChanged)

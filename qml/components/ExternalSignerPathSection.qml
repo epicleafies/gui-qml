@@ -33,10 +33,13 @@ FormSection {
     readonly property bool pathChanged: pathInput.text.trim() !== optionsModel.externalSignerPath
     property bool checkAfterValidation: false
     property bool checkAfterSave: false
+    // True from a check request until its result is in.
+    property bool checking: false
     // The status below describes the path in the field.
     readonly property bool checked: !root.pathChanged && !root.pathPending
         && walletController.externalSignerPathConfigured
-    readonly property bool commandResponding: root.checked && walletController.externalSignerResponding
+    readonly property bool commandResponding: root.checked && !root.checking
+        && walletController.externalSignerResponding
     readonly property bool deviceReady: root.commandResponding && walletController.canCreateExternalSignerWallet
 
     function commitPath() {
@@ -49,15 +52,19 @@ FormSection {
         return true
     }
 
+    // Checks only run when asked for. The results clear for a moment first,
+    // so a check that finds the same thing still visibly happened.
     function check() {
+        if (root.checking) return
         if (optionsModel.signerPathValidationPending) {
             root.checkAfterValidation = true
             return
         }
         root.checkAfterValidation = false
         if (!root.commitPath()) return
+        root.checking = true
         if (optionsModel.settingsPending) root.checkAfterSave = true
-        else walletController.refreshExternalSignerStatus()
+        else checkTimer.restart()
     }
 
     Connections {
@@ -68,7 +75,8 @@ FormSection {
         function onSettingsPendingChanged() {
             if (optionsModel.settingsPending || !root.checkAfterSave) return
             root.checkAfterSave = false
-            if (!optionsModel.settingsError) walletController.refreshExternalSignerStatus()
+            if (optionsModel.settingsError) root.checking = false
+            else checkTimer.restart()
         }
     }
 
@@ -85,6 +93,19 @@ FormSection {
 
     Component.onCompleted: root.showPathStart()
 
+    Timer {
+        id: checkTimer
+        interval: Theme.motion.animated ? 300 : 0
+        onTriggered: {
+            walletController.refreshExternalSignerStatus()
+            root.checking = false
+        }
+    }
+    // The path is saved when the check starts. A check still waiting when the
+    // section goes away runs now, so the next section doesn't show the old
+    // path's result as the new path's.
+    Component.onDestruction: if (checkTimer.running) walletController.refreshExternalSignerStatus()
+
     Connections {
         target: pathInput.field
         function onActiveFocusChanged() { root.showPathStart() }
@@ -97,9 +118,9 @@ FormSection {
         fileMode: AppFileDialog.OpenFile
         onAccepted: {
             if (selectedFile.toString().length === 0) return
-            // Show a local path, not a file URL, if the check rejects it.
+            // A local path, not a file URL. Checking it is a separate step.
             pathInput.text = walletController.normalizeWalletPath(selectedFile.toString())
-            root.check()
+            root.showPathStart()
         }
     }
 
@@ -139,7 +160,7 @@ FormSection {
                 errorText: root.pathError
                 supportingText: root.signerStatus.infoText || ""
                 onTextChanged: optionsModel.requestExternalSignerPathValidation(text)
-                onEditingFinished: root.check()
+                onAccepted: root.check()
             }
 
             NeutralButton {
@@ -164,6 +185,8 @@ FormSection {
         value: {
             //: Signer command status: no signer path is configured.
             if (optionsModel.externalSignerPath.length === 0 && !root.pathChanged) return qsTr("Not set")
+            //: Signer command status while the signer command and the device are being checked.
+            if (root.checking) return qsTr("Checking…")
             //: Signer command status: the path was edited and has not been checked yet.
             if (!root.checked) return qsTr("Not checked")
             //: Signer command status: the command ran and returned a list of devices.
@@ -171,10 +194,11 @@ FormSection {
             //: Signer command status: the command could not run or did not return a list of devices.
             return qsTr("Not responding")
         }
-        valueIconSource: !root.checked ? ""
+        valueIconSource: !root.checked || root.checking ? ""
             : root.commandResponding ? "image://images/check" : "image://images/cross-circle-filled"
         valueIconColor: root.commandResponding ? Theme.color.successText : Theme.color.dangerText
-        errorText: root.checked && !root.commandResponding ? walletController.externalSignerError : ""
+        errorText: root.checked && !root.checking && !root.commandResponding
+            ? walletController.externalSignerError : ""
     }
 
     ValueRow {
