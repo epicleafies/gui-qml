@@ -1,4 +1,4 @@
-// Copyright (c) 2023 The Bitcoin Core developers
+// Copyright (c) 2023-2026 The Bitcoin Core developers
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -23,8 +23,10 @@ Button {
     // Decorative: the control that shows the icon carries the name.
     Accessible.ignored: true
 
+    // A color set while the icon is hidden applies at once, so the icon
+    // never comes back showing the color of a state it no longer shows.
     Behavior on icon.color {
-        enabled: Theme.motion.animated
+        enabled: Theme.motion.animated && root.visible
         ColorAnimation {
             duration: Theme.motion.normal
         }
