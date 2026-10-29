@@ -138,7 +138,11 @@ Page {
         Item {
             id: contentFrame
             width: scrollView.availableWidth
-            height: content.height + 96
+            // Leave room under the content, but only as much as fits: a page
+            // whose content fits never scrolls just to show empty space, and
+            // one that overflows scrolls to its content plus a small margin.
+            height: Math.max(content.height + Theme.space.m + Theme.space.xxl,
+                             Math.min(content.height + 96, scrollView.availableHeight))
 
             // Inside the Flickable, so it sees taps before the Flickable takes them.
             TapHandler {
