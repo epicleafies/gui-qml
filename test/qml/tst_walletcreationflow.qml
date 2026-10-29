@@ -183,8 +183,12 @@ TestCase {
         const setup = findChild(flow, "externalSignerSetupPage")
         compare(setup.heading, "Set up HWI")
         compare(setup.showBackButton, true)
-        verify(findChild(setup, "externalSignerSetupReleasesLink") !== null)
-        verify(findChild(setup, "externalSignerSetupGuideLink") !== null)
+        // Each link sits in the step that needs it.
+        const releasesLink = findChild(setup, "externalSignerSetupReleasesLink")
+        const guideLink = findChild(setup, "externalSignerSetupGuideLink")
+        compare(releasesLink.parent.children[0].text, "1. Download HWI for your operating system and extract it.")
+        compare(guideLink.parent.children[0].text, "Need help? Follow the setup guide.")
+        compare(setup.subheading, "HWI (Hardware Wallet Interface) lets Bitcoin Core communicate with your hardware wallet.")
         const warning = findChild(setup, "externalSignerSetupDownloadWarning")
         compare(warning.text,
                 "Only use HWI downloaded from its official releases page. A modified executable can steal your coins.")

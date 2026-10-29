@@ -28,7 +28,7 @@ OnboardingView {
     //: Heading of the wallet creation step for setting up HWI, the program Bitcoin Core uses to talk to hardware wallets.
     heading: qsTr("Set up HWI")
     //: Explains HWI at the start of external signer wallet creation. "HWI" is a program name; keep it untranslated.
-    subheading: qsTr("HWI (Hardware Wallet Interface) lets Bitcoin Core communicate with your hardware wallet. Download HWI for your operating system from the releases page, extract it, and select the HWI executable below. If you already have HWI installed, select your existing executable.")
+    subheading: qsTr("HWI (Hardware Wallet Interface) lets Bitcoin Core communicate with your hardware wallet.")
     maximumContentWidth: 800
     // The intro and the status rows fill the step; a smaller gap keeps them
     // in view without scrolling.
@@ -59,21 +59,63 @@ OnboardingView {
         property alias pathSection: pathSection
         spacing: Theme.space.l
 
-        Flow {
+        // Each step carries the link it needs, so the links read as part of
+        // the instructions rather than a row of their own.
+        ColumnLayout {
+            objectName: "externalSignerSetupSteps"
             Layout.fillWidth: true
             spacing: Theme.space.m
 
-            LinkButton {
-                objectName: "externalSignerSetupReleasesLink"
-                //: Link to the download page for HWI releases.
-                text: qsTr("HWI releases")
-                onClicked: linkPopup.openLink("https://github.com/bitcoin-core/HWI/releases")
+            RowLayout {
+                Layout.fillWidth: true
+                spacing: Theme.space.m
+
+                CoreText {
+                    Layout.fillWidth: true
+                    //: First HWI setup step. The link beside it opens the HWI releases page.
+                    text: qsTr("1. Download HWI for your operating system and extract it.")
+                    color: Theme.color.neutral7
+                    textStyle: Theme.text.description
+                    wrap: true
+                    horizontalAlignment: Text.AlignLeft
+                }
+                LinkButton {
+                    objectName: "externalSignerSetupReleasesLink"
+                    //: Link to the download page for HWI releases.
+                    text: qsTr("HWI releases")
+                    onClicked: linkPopup.openLink("https://github.com/bitcoin-core/HWI/releases")
+                }
             }
-            LinkButton {
-                objectName: "externalSignerSetupGuideLink"
-                //: Link to the HWI setup documentation.
-                text: qsTr("HWI setup guide")
-                onClicked: linkPopup.openLink("https://github.com/bitcoin-core/HWI#readme")
+
+            CoreText {
+                Layout.fillWidth: true
+                //: Second HWI setup step.
+                text: qsTr("2. Select the HWI executable below. If HWI is already installed, select that one.")
+                color: Theme.color.neutral7
+                textStyle: Theme.text.description
+                wrap: true
+                horizontalAlignment: Text.AlignLeft
+            }
+
+            RowLayout {
+                Layout.fillWidth: true
+                spacing: Theme.space.m
+
+                CoreText {
+                    Layout.fillWidth: true
+                    //: Shown after the HWI setup steps. The link beside it opens the HWI setup documentation.
+                    text: qsTr("Need help? Follow the setup guide.")
+                    color: Theme.color.neutral7
+                    textStyle: Theme.text.description
+                    wrap: true
+                    horizontalAlignment: Text.AlignLeft
+                }
+                LinkButton {
+                    objectName: "externalSignerSetupGuideLink"
+                    //: Link to the HWI setup documentation.
+                    text: qsTr("HWI setup guide")
+                    onClicked: linkPopup.openLink("https://github.com/bitcoin-core/HWI#readme")
+                }
             }
         }
 
