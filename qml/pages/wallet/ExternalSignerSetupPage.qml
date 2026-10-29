@@ -74,6 +74,18 @@ OnboardingView {
             }
         }
 
+        // The signer runs with access to the wallet, as the Qt Widgets
+        // options dialog warns next to this setting. Same banner as the RPC
+        // console's warning about commands that can steal funds.
+        ToastBanner {
+            objectName: "externalSignerSetupDownloadWarning"
+            Layout.fillWidth: true
+            tone: ToastBanner.Error
+            textColor: Theme.color.neutral9
+            //: Shown under the HWI download links. The selected executable is run by Bitcoin Core and can act on the wallet.
+            text: qsTr("Only use HWI downloaded from its official releases page. A modified executable can steal your coins.")
+        }
+
         ExternalSignerPathSection {
             id: pathSection
             objectName: "externalSignerSetupPathSection"

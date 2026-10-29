@@ -185,6 +185,12 @@ TestCase {
         compare(setup.showBackButton, true)
         verify(findChild(setup, "externalSignerSetupReleasesLink") !== null)
         verify(findChild(setup, "externalSignerSetupGuideLink") !== null)
+        const warning = findChild(setup, "externalSignerSetupDownloadWarning")
+        compare(warning.text,
+                "Only use HWI downloaded from its official releases page. A modified executable can steal your coins.")
+        // The RPC console's banner for the same risk, and it can't be closed.
+        compare(warning.tone, ToastBanner.Error)
+        compare(warning.showsCloseButton, false)
         verify(findChild(setup, "externalSignerSetupBrowseButton") !== null)
         const pathSection = findChild(setup, "externalSignerSetupPathSection")
         compare(pathSection.title, "HWI executable")
