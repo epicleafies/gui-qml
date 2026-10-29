@@ -44,6 +44,12 @@ TestCase {
         {hue: "warning", bg: "background"}, {hue: "warning", bg: "surface1"},
         {hue: "paymentRequest", bg: "background"}, {hue: "paymentRequest", bg: "surface1"}
     ]
+    // Status icons beside text are glyphs: 3:1 on the surfaces rows sit on.
+    readonly property var iconPairs: [
+        {fg: "warningIcon", bg: "background", min: 3},
+        {fg: "warningIcon", bg: "surface1", min: 3},
+        {fg: "warningIcon", bg: "surface2", min: 3}
+    ]
     readonly property var focusPairs: [
         {fg: "focus", bg: "background", min: 3},
         {fg: "focus", bg: "surface1", min: 3},
@@ -120,6 +126,9 @@ TestCase {
 
     function test_text_data() { return palettesData() }
     function test_text(data) { checkPairs(data, textPairs) }
+
+    function test_icons_data() { return palettesData() }
+    function test_icons(data) { checkPairs(data, iconPairs) }
 
     function test_focus_data() { return palettesData() }
     function test_focus(data) { checkPairs(data, focusPairs) }

@@ -40,6 +40,8 @@ Palette {
     successText: "#1A7440"
     infoText: "#1A6B99"
     warningText: "#6D6200"
+    // 3:1 on background, surface1 and surface2.
+    warningIcon: "#AD7C00"
     paymentRequestText: "#364AFC"
     // neutral6 is under 3:1 on surface2 in light.
     placeholder: neutral7

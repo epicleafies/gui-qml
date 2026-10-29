@@ -195,7 +195,7 @@ FormSection {
         // A missing, locked or extra device is fixed at the device, not in
         // the path, so it reads as guidance with a warning, not as an error.
         valueIconSource: root.deviceReady ? "image://images/check" : "image://images/alert-filled"
-        valueIconColor: root.deviceReady ? Theme.color.successText : Theme.color.warningText
+        valueIconColor: root.deviceReady ? Theme.color.successText : Theme.color.warningIcon
         supportingText: {
             if (root.deviceReady) return ""
             if (walletController.externalSignerError.length > 0) return walletController.externalSignerError
