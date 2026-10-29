@@ -567,6 +567,7 @@ bool WalletQmlController::createExternalSignerWallet(const QString& name)
     clearWalletLoadStatus();
     clearWalletMigrationStatus();
 #ifndef ENABLE_EXTERNAL_SIGNER
+    //: Shown when creating an external signer wallet in a build compiled without external signer support.
     setWalletLoadError(tr("This build does not support external signers."));
     return false;
 #endif
@@ -784,6 +785,7 @@ QString WalletQmlController::externalSignerDeviceError(const std::string& error,
     if (!error.starts_with(prefix)) return {};
     const std::string detail{error.substr(prefix.size())};
     if (detail == "error") {
+        //: The external signer tool reported an error for the connected hardware wallet without saying why.
         return tr("Your device isn't ready. Unlock it, then check again.");
     }
     if (detail.starts_with("error: ")) {
@@ -791,6 +793,7 @@ QString WalletQmlController::externalSignerDeviceError(const std::string& error,
         return tr("Your device isn't ready: %1").arg(QString::fromStdString(detail.substr(7)));
     }
     if (detail == "received invalid response, missing signer fingerprint") {
+        //: The connected hardware wallet did not report its fingerprint, usually because it is locked.
         return tr("Your device didn't share its fingerprint. Unlock it, then check again.");
     }
     return {};
