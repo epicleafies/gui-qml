@@ -310,6 +310,36 @@ TestCase {
         }
     }
 
+    Component {
+        id: compactSignerSectionComponent
+        ExternalSignerPathSection { width: 900; title: "Signer executable" }
+    }
+
+    // The actions sit under the field at any width and wrap when there is no
+    // room, including after an existing page is narrowed.
+    function test_externalSignerButtonsStayUnderTheField() {
+        const section = createTemporaryObject(compactSignerSectionComponent, settingsWindow.contentItem)
+        verify(section !== null)
+        const field = findChild(section, "externalSignerPathInput")
+        const browse = findChild(section, "externalSignerBrowseButton")
+        const check = findChild(section, "externalSignerCheckDeviceButton")
+        const below = function(item) {
+            return item.mapToItem(section, 0, 0).y >= field.mapToItem(section, 0, field.height).y
+        }
+        const inside = function(item) {
+            const x = item.mapToItem(section, 0, 0).x
+            return x >= 0 && x + item.width <= section.width
+        }
+        tryVerify(function() { return below(browse) && below(check) })
+        compare(browse.mapToItem(section, 0, 0).y, check.mapToItem(section, 0, 0).y)
+
+        section.width = 300
+        tryVerify(function() { return field.width > 0 && field.width <= section.width })
+        tryVerify(function() { return below(browse) && below(check) && inside(browse) && inside(check) })
+        // Two buttons that no longer fit side by side wrap.
+        verify(check.mapToItem(section, 0, 0).y > browse.mapToItem(section, 0, 0).y)
+    }
+
     function test_settingsViewHidesExternalSignerWithoutBuildSupport() {
         optionsModel.externalSignerPath = "/usr/local/bin/hwi"
         try {

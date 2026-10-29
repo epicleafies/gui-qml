@@ -81,18 +81,16 @@ FormSection {
         Layout.fillWidth: true
         enabled: root.editable
         bodySpacing: 0
-        bodyItem: GridLayout {
+        // The actions sit right under the field they act on and wrap when
+        // there is no room, so nothing needs to reflow between width classes.
+        bodyItem: ColumnLayout {
             Layout.fillWidth: true
             Layout.minimumWidth: 0
-            // The buttons go under the field when there is no room beside it.
-            columns: SizeClass.isCompact(root.width) ? 1 : 3
-            columnSpacing: Theme.space.ml
-            rowSpacing: Theme.space.ml
+            spacing: Theme.space.ml
 
             LabeledTextField {
                 id: pathInput
                 Layout.fillWidth: true
-                Layout.alignment: Qt.AlignTop
                 // The section title is the visible label.
                 accessibleName: root.title
                 fieldObjectName: root.namePrefix + "PathInput"
@@ -114,29 +112,30 @@ FormSection {
                 onEditingFinished: root.check()
             }
 
-            NeutralButton {
-                objectName: root.namePrefix + "BrowseButton"
-                Layout.alignment: Qt.AlignTop
-                Layout.preferredHeight: Theme.size.control
-                // Large matches the primary button's text beside it.
-                buttonSize: NeutralButton.Large
-                surfaceLevel: root.surfaceLevel + 1
-                //: Opens a file dialog to choose the external signer executable.
-                text: qsTr("Browse…")
-                enabled: root.editable
-                onClicked: root.choosePath()
-            }
+            Flow {
+                Layout.fillWidth: true
+                spacing: Theme.space.ml
 
-            PrimaryButton {
-                objectName: root.namePrefix + "CheckDeviceButton"
-                visible: root.showCheckButton
-                Layout.alignment: Qt.AlignTop
-                Layout.preferredHeight: Theme.size.control
-                horizontalPadding: Theme.space.xl
-                //: Button that saves the signer path and checks the command and the connected device.
-                text: qsTr("Check device")
-                enabled: root.pathError.length === 0 && root.editable
-                onClicked: root.check()
+                NeutralButton {
+                    objectName: root.namePrefix + "BrowseButton"
+                    // Large matches the primary button beside it.
+                    buttonSize: NeutralButton.Large
+                    surfaceLevel: root.surfaceLevel + 1
+                    //: Opens a file dialog to choose the external signer executable.
+                    text: qsTr("Browse…")
+                    enabled: root.editable
+                    onClicked: root.choosePath()
+                }
+
+                PrimaryButton {
+                    objectName: root.namePrefix + "CheckDeviceButton"
+                    visible: root.showCheckButton
+                    horizontalPadding: Theme.space.xl
+                    //: Button that saves the signer path and checks the command and the connected device.
+                    text: qsTr("Check device")
+                    enabled: root.pathError.length === 0 && root.editable
+                    onClicked: root.check()
+                }
             }
         }
     }
