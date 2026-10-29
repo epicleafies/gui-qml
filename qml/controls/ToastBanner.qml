@@ -61,6 +61,10 @@ Rectangle {
         hideAnim.restart()
     }
 
+    // A banner already visible when it is created gets no visibleChanged,
+    // so it fades in from here instead of staying transparent.
+    Component.onCompleted: if (visible) fadeInAnim.restart()
+
     onVisibleChanged: {
         if (visible) {
             fadeOutAnim.stop()

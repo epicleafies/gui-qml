@@ -27,6 +27,14 @@ TestCase {
         }
     }
 
+    Component {
+        id: shownBannerComponent
+        ToastBanner {
+            width: 360
+            text: "Only use HWI from its official releases page."
+        }
+    }
+
     function cleanup() {
         Theme.motion.resetMode()
     }
@@ -46,5 +54,14 @@ TestCase {
         wait(Theme.motion.fast * 2)
         compare(banner.opacity, 1)
         compare(banner.visible, true)
+    }
+
+    // A banner that is shown from the start, on a page that is already up,
+    // fades in like one shown later.
+    function test_shown_when_created_fades_in() {
+        Theme.motion.mode = "full"
+        const banner = createTemporaryObject(shownBannerComponent, testWindow.contentItem)
+        verify(banner.visible)
+        tryCompare(banner, "opacity", 1)
     }
 }
