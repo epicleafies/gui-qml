@@ -240,7 +240,10 @@ TestCase {
         verify(findChild(setup, "externalSignerSetupGuideLink") !== null)
         verify(findChild(setup, "externalSignerSetupBrowseButton") !== null)
         const pathSection = findChild(setup, "externalSignerSetupPathSection")
-        compare(pathSection.title, "HWI executable")
+        compare(pathSection.title, "Signer executable")
+        compare(findChild(setup, "externalSignerSetupPathDialog").title, "Select signer executable")
+        // The placeholder is an example path, not an instruction.
+        verify(findChild(setup, "externalSignerSetupPathInput").placeholderText.indexOf("hwi") >= 0)
         // The card sits one level up on the dialog's surface.
         compare(pathSection.surfaceLevel, setup.surfaceLevel)
         compare(findChild(setup, "externalSignerSetupCheckDeviceButton").visible, false)
@@ -251,7 +254,7 @@ TestCase {
 
         findChild(setup, "externalSignerSetupPathInput").text = "/opt/hwi/hwi"
         compare(findChild(setup, "externalSignerSetupCommandRow").value, "Not checked")
-        compare(setup.primaryButton.text, "Check HWI")
+        compare(setup.primaryButton.text, "Check device")
         compare(setup.primaryButton.enabled, true)
         setup.primaryButton.clicked()
         compare(optionsModel.externalSignerPath, "/opt/hwi/hwi")
@@ -317,7 +320,7 @@ TestCase {
         compare(commandRow.value, "Not responding")
         compare(commandRow.errorText, walletController.externalSignerError)
         compare(findChild(setup, "externalSignerSetupDeviceRow").visible, false)
-        compare(setup.primaryButton.text, "Check HWI")
+        compare(setup.primaryButton.text, "Check device")
     }
 
     // A working command skips setup. Without a device the form can check

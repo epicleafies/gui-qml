@@ -41,8 +41,8 @@ OnboardingView {
         if (root.deviceReady) return qsTr("Use this device")
         //: Checks again for a connected hardware wallet after HWI responded.
         if (root.pathSection && root.pathSection.commandResponding) return qsTr("Check again")
-        //: Saves the HWI path and checks that HWI responds.
-        return qsTr("Check HWI")
+        //: Saves the signer path and checks the signer command and the connected hardware wallet. Same label as on the external signer settings page.
+        return qsTr("Check device")
     }
     primaryButtonEnabled: root.pathSection !== null && root.pathSection.editable
         && root.pathSection.pathText.trim().length > 0 && root.pathSection.pathError.length === 0
@@ -82,8 +82,10 @@ OnboardingView {
             showCheckButton: false
             // The step sits on a dialog, so the card is one level up.
             surfaceLevel: root.surfaceLevel
-            //: Title of the field for the path of the HWI executable during wallet creation.
-            title: qsTr("HWI executable")
+            // Named as on the external signer settings page: the field takes
+            // any signer, HWI or another.
+            //: Title of the field for the external signer executable, such as HWI.
+            title: qsTr("Signer executable")
         }
     }
 
