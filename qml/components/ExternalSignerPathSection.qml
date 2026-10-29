@@ -24,6 +24,7 @@ FormSection {
     // Validating and saving the path both run off the GUI thread. A check
     // waits for both, so it runs the command the field shows.
     readonly property bool pathPending: optionsModel.signerPathValidationPending || optionsModel.settingsPending
+    readonly property string pathText: pathInput.text
     readonly property string pathError: optionsModel.signerPathError || ""
     readonly property bool pathChanged: pathInput.text.trim() !== optionsModel.externalSignerPath
     property bool checkAfterValidation: false
