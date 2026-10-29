@@ -784,13 +784,14 @@ QString WalletQmlController::externalSignerDeviceError(const std::string& error,
     if (!error.starts_with(prefix)) return {};
     const std::string detail{error.substr(prefix.size())};
     if (detail == "error") {
-        return tr("The device reported an error. Unlock it and check again.");
+        return tr("Your device isn't ready. Unlock it, then check again.");
     }
     if (detail.starts_with("error: ")) {
-        return tr("The device reported an error: %1").arg(QString::fromStdString(detail.substr(7)));
+        //: %1 is the reason given by the external signer tool, for example "Device is locked".
+        return tr("Your device isn't ready: %1").arg(QString::fromStdString(detail.substr(7)));
     }
     if (detail == "received invalid response, missing signer fingerprint") {
-        return tr("The device did not share its fingerprint. Unlock it and check again.");
+        return tr("Your device didn't share its fingerprint. Unlock it, then check again.");
     }
     return {};
 }
