@@ -41,8 +41,7 @@ SettingsPage {
             ? qsTr("Checking…")
             //: Button that saves the signer path and checks the command and the connected device.
             : qsTr("Check device")
-        enabled: pathSection.pathError.length === 0 && !pathSection.pathPending && pathSection.editable
-            && !pathSection.checking
+        enabled: pathSection.pathError.length === 0 && !pathSection.pathPending && !pathSection.checking
         onClicked: pathSection.check()
     }
 }

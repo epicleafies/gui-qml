@@ -561,6 +561,35 @@ TestCase {
         }
     }
 
+    // A path set on the command line can't be changed here, but can still be
+    // checked, for example after connecting a device.
+    function test_externalSignerCommandLinePathCanStillBeChecked() {
+        optionsModel.externalSignerPath = "/opt/hwi/hwi"
+        optionsModel.setCoreSettingStatusForTest("signer", false, "command_line", "Set on the command line.", false)
+        try {
+            const checks = walletController.externalSignerRefreshCalls
+            const view = createTemporaryObject(settingsViewComponent, settingsWindow.contentItem)
+            verify(view !== null)
+            view.selectSection("external-signer", true)
+            tryCompare(view.pageContainer, "depth", 1)
+            const section = findChild(view, "externalSignerPathSection")
+            const checkButton = findChild(view, "externalSignerCheckDeviceButton")
+            compare(section.editable, false)
+            compare(findChild(view, "externalSignerPathRow").enabled, false)
+            compare(findChild(view, "externalSignerBrowseButton").enabled, false)
+            compare(checkButton.enabled, true)
+
+            checkButton.clicked()
+            compare(checkButton.text, "Checking…")
+            tryCompare(section, "checking", false)
+            compare(walletController.externalSignerRefreshCalls, checks + 1)
+            compare(optionsModel.externalSignerPath, "/opt/hwi/hwi")
+        } finally {
+            optionsModel.clearCoreSettingStatusesForTest()
+            optionsModel.externalSignerPath = ""
+        }
+    }
+
     // Closing the section while a check is still waiting runs the check, so
     // the result on file belongs to the path that was saved.
     function test_externalSignerCheckRunsWhenClosedEarly() {

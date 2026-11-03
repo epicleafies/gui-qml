@@ -365,6 +365,33 @@ TestCase {
         compare(setup.primaryButton.text, "Check device")
     }
 
+    // A path set on the command line can't be changed in setup, but the step
+    // can still check it again instead of only being left.
+    function test_external_signer_command_line_path_can_be_checked_in_setup() {
+        optionsModel.externalSignerPath = "/usr/local/bin/hwi"
+        optionsModel.setCoreSettingStatusForTest("signer", false, "command_line", "Set on the command line.", false)
+        try {
+            walletController.externalSignerPathConfigured = true
+            walletController.externalSignerError = "The signer command did not return valid output. Check that the path is correct."
+            const flow = createFlow()
+            findChild(flow, "walletTypeExternalSigner").clicked()
+            tryVerify(function() { return findChild(flow, "externalSignerSetupPage") !== null })
+
+            const setup = findChild(flow, "externalSignerSetupPage")
+            const checks = walletController.externalSignerRefreshCalls
+            compare(findChild(setup, "externalSignerSetupPathRow").enabled, false)
+            compare(setup.primaryButton.text, "Check device")
+            compare(setup.primaryButton.enabled, true)
+
+            setup.primaryButton.clicked()
+            tryCompare(setup.pathSection, "checking", false)
+            compare(walletController.externalSignerRefreshCalls, checks + 1)
+            compare(optionsModel.externalSignerPath, "/usr/local/bin/hwi")
+        } finally {
+            optionsModel.clearCoreSettingStatusesForTest()
+        }
+    }
+
     // A working command skips setup. Without a device the form can check
     // again, and a device found that way names the wallet.
     function test_external_signer_responding_without_device_checks_again_on_form() {

@@ -63,7 +63,9 @@ FormSection {
     }
 
     // Checks only run when asked for. The results clear for a moment first,
-    // so a check that finds the same thing still visibly happened.
+    // so a check that finds the same thing still visibly happened. A path
+    // set on the command line can't be saved, but can still be checked, for
+    // example after connecting a device.
     function check() {
         if (root.checking) return
         if (optionsModel.signerPathValidationPending) {
@@ -71,7 +73,7 @@ FormSection {
             return
         }
         root.checkAfterValidation = false
-        if (!root.commitPath()) return
+        if (root.editable && !root.commitPath()) return
         root.checking = true
         if (optionsModel.settingsPending) root.checkAfterSave = true
         else checkTimer.restart()
