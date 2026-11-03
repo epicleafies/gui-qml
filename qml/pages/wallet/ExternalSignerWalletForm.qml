@@ -28,6 +28,7 @@ OnboardingView {
 
     signal cancel()
     signal created(var wallet)
+    signal changeSignerRequested()
 
     function submit() {
         if (!canCreate) return
@@ -113,6 +114,17 @@ OnboardingView {
             textStyle: Theme.text.body
             wrap: true
             horizontalAlignment: Text.AlignLeft
+        }
+
+        // A working signer skips the setup step on the way here; this goes
+        // back to it to pick another executable.
+        LinkButton {
+            objectName: "externalWalletChangeSignerButton"
+            Layout.alignment: Qt.AlignLeft
+            //: Opens the external signer setup step from wallet naming, to choose another signer executable.
+            text: qsTr("Change signer executable")
+            enabled: !root.creatingWallet && !root.checking
+            onClicked: root.changeSignerRequested()
         }
 
         LabeledTextField {

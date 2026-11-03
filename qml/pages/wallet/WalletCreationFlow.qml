@@ -294,8 +294,14 @@ Item {
     Component {
         id: externalSetup
         ExternalSignerSetupPage {
+            // Opened from the naming form to change the executable, the step
+            // returns to that form rather than opening a second one.
+            property bool returnsToForm: false
             onCancel: root.finished(false, null)
-            onReady: root.showExternalSignerForm()
+            onReady: {
+                if (returnsToForm) root.pop()
+                else root.showExternalSignerForm()
+            }
         }
     }
     Component {
@@ -307,6 +313,8 @@ Item {
                 root.completedWallet = wallet
                 root.push(externalConfirm, {}, StackView.Immediate)
             }
+            onChangeSignerRequested: root.push(externalSetup, { "modalView": root.modalView,
+                                                                "returnsToForm": true })
         }
     }
     Component {

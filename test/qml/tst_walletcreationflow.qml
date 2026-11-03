@@ -428,6 +428,51 @@ TestCase {
         compare(form.secondaryButtonText, "")
     }
 
+    // A working signer skips setup on the way to naming, but the form can
+    // still go back to setup to choose another executable, and setup returns
+    // to that same form.
+    function test_external_signer_form_can_change_the_executable() {
+        setSignerResponding("Coldcard Mk4")
+        const flow = createFlow()
+        findChild(flow, "walletTypeExternalSigner").clicked()
+        tryVerify(function() { return findChild(flow, "externalSignerWalletFormPage") !== null })
+        const pages = findChild(flow, "walletCreationPageStack")
+        const form = pages.currentItem
+        compare(form.objectName, "externalSignerWalletFormPage")
+        const depth = pages.depth
+        const change = findChild(form, "externalWalletChangeSignerButton")
+        verify(change !== null)
+        compare(change.text, "Change signer executable")
+        compare(change.enabled, true)
+
+        // Back from setup returns to the form.
+        change.clicked()
+        tryCompare(pages, "depth", depth + 1)
+        let setup = pages.currentItem
+        compare(setup.objectName, "externalSignerSetupPage")
+        compare(findChild(setup, "externalSignerSetupPathInput").text, "/usr/local/bin/hwi")
+        compare(setup.showBackButton, true)
+        flow.goBack()
+        tryCompare(pages, "depth", depth)
+        compare(pages.currentItem, form)
+
+        // Another executable that finds a device continues with the same form.
+        change.clicked()
+        tryCompare(pages, "depth", depth + 1)
+        setup = pages.currentItem
+        findChild(setup, "externalSignerSetupPathInput").text = "/opt/hwi/hwi"
+        compare(setup.primaryButton.text, "Check device")
+        setup.primaryButton.clicked()
+        compare(optionsModel.externalSignerPath, "/opt/hwi/hwi")
+        tryCompare(setup.pathSection, "checking", false)
+        compare(setup.primaryButton.text, "Use this device")
+        setup.primaryButton.clicked()
+        tryCompare(pages, "depth", depth)
+        compare(pages.currentItem, form)
+        compare(findChild(form, "externalWalletNameInput").text, "Coldcard Mk4")
+        compare(form.primaryButton.enabled, true)
+    }
+
     // Without build support no signer can be used, whatever the signer
     // status says, so the other wallet types are all that is offered.
     function test_external_signer_hidden_without_build_support() {
