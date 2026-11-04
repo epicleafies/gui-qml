@@ -194,15 +194,37 @@ QString AddressListModel::addressAt(int row) const
     return m_entries.at(row).address;
 }
 
+QVariantMap AddressListModel::entryForAddress(const QString& address) const
+{
+    if (address.isEmpty()) return {};
+    const auto details{[this](const AddressEntry& entry) -> QVariantMap {
+        return {
+            {QStringLiteral("address"), entry.address},
+            {QStringLiteral("isUsed"), entry.used},
+            {QStringLiteral("displayAmount"), DisplayAmount(entry.current_balance, m_display_unit)},
+            {QStringLiteral("hasAmount"), entry.current_balance != 0},
+        };
+    }};
+    // The rows are current after every rebuild, so look there first. Only a
+    // used address hidden by the filter needs another scan of the wallet.
+    for (const AddressEntry& entry : m_entries) {
+        if (entry.address == address) return details(entry);
+    }
+    for (const AddressEntry& entry : collectEntries(/*include_used=*/true)) {
+        if (entry.address == address) return details(entry);
+    }
+    return {};
+}
+
 void AddressListModel::rebuild()
 {
     beginResetModel();
-    m_entries = collectEntries();
+    m_entries = collectEntries(m_show_used);
     endResetModel();
     Q_EMIT countChanged();
 }
 
-std::vector<AddressListModel::AddressEntry> AddressListModel::collectEntries() const
+std::vector<AddressListModel::AddressEntry> AddressListModel::collectEntries(bool include_used) const
 {
     std::vector<AddressEntry> entries;
     if (!m_wallet_model) return entries;
@@ -238,7 +260,7 @@ std::vector<AddressListModel::AddressEntry> AddressListModel::collectEntries() c
         if (address.isEmpty()) continue;
 
         const bool used{used_addresses.count(address) > 0};
-        if (used && !m_show_used) {
+        if (used && !include_used) {
             continue;
         }
 
