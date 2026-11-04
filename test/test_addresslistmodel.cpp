@@ -110,6 +110,7 @@ class AddressListModelTests : public QObject
 private Q_SLOTS:
     void initTestCase();
     void receiveAddressesHideUsedUntilEnabled();
+    void entryForAddressIncludesHiddenUsedAddress();
     void labelsCanBeEdited();
     void changeAddressesComeFromUnspentChangeOutputs();
 };
@@ -143,6 +144,47 @@ void AddressListModelTests::receiveAddressesHideUsedUntilEnabled()
 
     model->setShowUsed(true);
     QCOMPARE(model->rowCount(), 2);
+}
+
+void AddressListModelTests::entryForAddressIncludesHiddenUsedAddress()
+{
+    auto wallet{std::make_unique<TestAddressWallet>()};
+    const CTxDestination dest{TestDestination(1)};
+    const CAmount amount{COIN / 500};
+    const interfaces::WalletTx payment{WalletTxFor({dest}, {amount}, {false})};
+    wallet->m_addresses = {
+        {dest, true, wallet::AddressPurpose::RECEIVE, "open in details"},
+    };
+
+    TestAddressWallet* wallet_ptr{wallet.get()};
+    WalletQmlModel wallet_model{std::move(wallet)};
+    AddressListModel* model{wallet_model.addressListModel()};
+    model->refresh();
+
+    const QString address{QString::fromStdString(EncodeDestination(dest))};
+    QVariantMap entry{model->entryForAddress(address)};
+    QCOMPARE(model->rowCount(), 1);
+    QCOMPARE(entry.value(QStringLiteral("address")).toString(), address);
+    QCOMPARE(entry.value(QStringLiteral("isUsed")).toBool(), false);
+    QCOMPARE(entry.value(QStringLiteral("hasAmount")).toBool(), false);
+    QCOMPARE(entry.value(QStringLiteral("displayAmount")).toString(), QStringLiteral("₿ 0"));
+
+    // Once paid, the address leaves the unused list but can still be looked up.
+    interfaces::WalletTxOut coin;
+    coin.txout = CTxOut{amount, GetScriptForDestination(dest)};
+    wallet_ptr->m_txs.insert(payment);
+    wallet_ptr->m_coins[dest].push_back({COutPoint{payment.tx->GetHash(), 0}, coin});
+    model->refresh();
+
+    entry = model->entryForAddress(address);
+    QCOMPARE(model->rowCount(), 0);
+    QCOMPARE(entry.value(QStringLiteral("address")).toString(), address);
+    QCOMPARE(entry.value(QStringLiteral("isUsed")).toBool(), true);
+    QCOMPARE(entry.value(QStringLiteral("hasAmount")).toBool(), true);
+    QCOMPARE(entry.value(QStringLiteral("displayAmount")).toString(), QStringLiteral("₿ 0.002"));
+
+    QVERIFY(model->entryForAddress(QString::fromStdString(EncodeDestination(TestDestination(2)))).isEmpty());
+    QVERIFY(model->entryForAddress(QString{}).isEmpty());
 }
 
 void AddressListModelTests::labelsCanBeEdited()
